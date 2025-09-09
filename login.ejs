@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="./assets/img/moki1.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,700,500,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <title>Moki - Connexion</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="nav-header">
+                <section class="nav-logo"><img src="./assets/img/moki1.png" alt="Moki"></section>
+                <div class="nav-menu">
+                    <a href="/login" class="btn-menu">Se connecter</a>
+
+                    <div class="toggle-menu">
+                        <section class="toogle"></section>
+                        <section class="toogle"></section>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container container-login">
+            <div class="form-container">
+                <section class="semi-bold">Connectez-vous à Moki</section>
+
+                <form action="/login" method="post" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Nom d'utilisateur :</label>
+                        <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe :</label>
+                        <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+                    </div>
+
+                    <button type="submit" class="button-primary">Se connecter</button>
+                </form>
+
+                <section class="main-description">
+                    <p>Nouveau sur Moki ? <a href="/signup" class="link-primary">Inscrivez-vous maintenant</a>.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
