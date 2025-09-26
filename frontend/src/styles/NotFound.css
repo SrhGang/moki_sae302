@@ -1,0 +1,128 @@
+/* src/styles/global.css */
+
+:root {
+
+    /*--========== color ==========*/
+    
+    --Cream: #F5F5EF;
+    --Chartreuse: #CBCF4B;
+    --Purple: #A296EE;
+    --Pure-Black: #000000;
+    --Bittersweet: #EE6352;
+	--Pale-Gray: #e9e9e9;
+	--Camel-Case: #4467AE;
+	--Grey-Light: #F6F6F6;
+
+	--header-height: var(--mb-3);
+
+	/*--========== font & typography ==========*/
+
+	--big-font-size: 2rem;
+	--bigger-font-size: 3rem;
+	--h1-font-size: 1.5rem;
+	--h2-font-size: 1.25rem;
+	--h3-font-size: 1.125rem;
+	--normal-font-size: .938rem;
+	--small-font-size: .813rem;
+	--smaller-font-size: .75rem;
+
+	/*--========== font weight ==========*/
+
+	--font-light: 300;
+	--font-regular: 400;
+	--font-medium: 500;
+	--font-semi-bold: 600;
+	--font-bold: 700;
+
+	/*--========== margenes ==========*/
+
+	--mp-0-25: .25rem;
+	--mp-0-5: .5rem;
+	--mp-0-75: .75rem;
+	--mp-1: 1rem;
+	--mp-1-5: 1.5rem;
+	--mp-2: 2rem;
+	--mp-2-5: 2.5rem;
+	--mp-3: 3rem;
+
+	/*--========== Z-index ==========*/
+
+	--Z-tooltip: 10;
+	--Z-fixed: 100;
+	--Z-modal: 1000;
+
+	/*--========== hover overlay ==========*/
+
+	--img-scale: scale(1.1);
+	
+}
+
+.utility-wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 100vw;
+    font-size: var(--normal-font-size);
+    max-height: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: var(--Cream);
+}
+
+.utility-container {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 90%;
+    height: 100%;
+    margin-bottom: 0px;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+}
+
+.text-mono, .utility-wrapper :is(button) {
+    font-size: var(--normal-font-size);
+    line-height: 1.5;
+    font-weight: var(--font-regular);
+    letter-spacing: 1px;
+}
+
+.utility-wrapper :is(button) {cursor: pointer;}
+
+.utility-content {
+    max-width: 580px;
+    margin-top: calc(var(--mb-3) + var(--mp-2));
+    margin-bottom: calc(var(--mb-3) + var(--mp-2));
+}
+
+.utility-content h1 {
+    margin-top: 0;
+    margin-bottom: var(--mp-1);
+    font-size: var(--bigger-font-size);
+    line-height: 1.1;
+    font-weight: var(--font-medium);
+    letter-spacing: -0.02em;
+}
