@@ -64,16 +64,18 @@ const Dashboard: React.FC = () => {
     setNewMessage("");
   };
 
-    const userAction = document.querySelector('.user-action');
+    const userAction = document.querySelector('.user-action') ;
     const modal = document.querySelector('.modal-user');
-    const conversationContent = document.querySelector('.conversation-area-content');
+    const conversationContent = document.querySelector('.chat_content');
 
     userAction?.addEventListener('click', function() {
         if (modal?.classList.contains('active')) {
             // Fermer le modal
-            modal.classList.remove('active');
-            conversationContent?.classList.remove('scaled');
+            // modal.classList.remove('active');
+            // conversationContent?.classList.remove('scaled');
         } else {
+          console.log("modale-activer");
+          
             // Ouvrir le modal
             modal?.classList.add('active');
             conversationContent?.classList.add('scaled');
