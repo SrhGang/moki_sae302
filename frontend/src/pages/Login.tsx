@@ -1,0 +1,60 @@
+// frontend/src/pages/Home.tsx
+
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "../styles/login.css"; 
+import useAuth from "hooks/useAuth";
+
+const Login = () => {
+    const { message, login } = useAuth();
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+
+    const handleLogin = () => {
+        console.log('Username : ', username);
+        console.log('Password : ', password);
+        login(username, password)
+    }
+
+  return (
+    <>
+    <main>
+        <div className="container container-login">
+            <div className="form-container">
+                <section className="bold login-title">Connectez-vous à <Link to="/" className="home">Mo<span className="k">k</span>i</Link></section>
+
+                <form className="login-form">
+                    <div className="form-group">
+
+                        <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" value={username}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>)=> {
+                            setUsername(event.target.value);
+                        }}
+                        required />
+                    </div>
+
+                    <div className="form-group">
+                        
+                        <input type="password" id="password" name="password" value={password} placeholder="Mot de passe"
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>)=> {
+                            setPassword(event.target.value);
+                        }}
+                        required />
+                    </div>
+
+                    <section className="message">{message}</section>
+
+                    <button type="button" onClick={handleLogin} className="button-primary">Se connecter</button>
+                </form>
+
+                <section className="main-description">
+                    <p>Nouveau sur Moki ? <Link to="/Signup" className="link-primary">Inscrivez-vous ! </Link></p>
+                </section>
+            </div>
+        </div>
+    </main>
+    </>
+  );
+};
+
+export default Login;

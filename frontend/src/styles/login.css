@@ -1,0 +1,166 @@
+:root {
+
+    /*--========== color ==========*/
+    
+    --Cream: #F5F5EF;
+    --Chartreuse: #CBCF4B;
+    --Purple: #634B66; 
+    --Pure-Black: #000000;
+    --Bittersweet: #EE6352;
+	--Pale-Gray: #e9e9e9;
+	--Camel-Case: #4467AE;
+	--Grey-Light: #F6F6F6;
+	--Yellow-Gren: #99C24D;
+
+	--header-height: var(--mb-3);
+
+	/*--========== font & typography ==========*/
+
+	--big-font-size: 2rem;
+	--bigger-font-size: 3rem;
+	--h1-font-size: 1.5rem;
+	--h2-font-size: 1.25rem;
+	--h3-font-size: 1.125rem;
+	--normal-font-size: .938rem;
+	--small-font-size: .813rem;
+	--smaller-font-size: .75rem;
+
+	/*--========== font weight ==========*/
+
+	--font-light: 300;
+	--font-regular: 400;
+	--font-medium: 500;
+	--font-semi-bold: 600;
+	--font-bold: 700;
+
+	/*--========== margenes ==========*/
+
+	--mp-0-25: .25rem;
+	--mp-0-5: .5rem;
+	--mp-0-75: .75rem;
+	--mp-1: 1rem;
+	--mp-1-5: 1.5rem;
+	--mp-2: 2rem;
+	--mp-2-5: 2.5rem;
+	--mp-3: 3rem;
+
+	/*--========== Z-index ==========*/
+
+	--Z-tooltip: 10;
+	--Z-fixed: 100;
+	--Z-modal: 1000;
+
+	/*--========== hover overlay ==========*/
+
+	--img-scale: scale(1.1);
+    --transition-speed: cubic-bezier(.28, .11, .32, 1);
+    --transition-fast: .2s var(--transition-speed);
+    --transition-default: .3s var(--transition-speed);
+    --transition-slow: 1.32s var(--transition-speed);
+	
+}
+
+.container.container-login{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+     background-image: url("../../public/assets/img/peeps-avatar-alpha-2.png");
+    height: 100vh;
+    width: 100%;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;   /* empile le petit et grand texte */
+    justify-content: center;
+}
+
+.container-login::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* hauteur de l'ombre */
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+  /* background-color:rgba(0,0,0,0.4) ; */
+  backdrop-filter: blur(5px);
+
+}
+
+.container .form-container{
+    font-size: var(--normal-font-size);
+    z-index: var(--Z-tooltip);
+    border-radius: var(--mp-1);
+    padding: var(--mp-2);
+    display: flex;
+    width: 480px;
+    
+    flex-direction: column;
+    backdrop-filter: blur(5px);
+    gap: var(--mp-2);
+    background-color: rgba(251,251,249, 0.5);
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+}
+
+.form-container .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mp-1-5);
+}
+
+.login-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group input{
+    border-bottom: 1px solid var(--Pure-Black);
+    /* background-color: rgba(241, 241, 240, 0.33); */
+    padding: var(--mp-0-5) var(--mp-0-75);
+    border-radius: var(--mp-0-5) var(--mp-0-5) 0 0 ;
+    outline: none;
+    transition: border-bottom var(--transition-speed);
+}
+
+.form-group input:hover, .form-group input:focus{
+    border-bottom: 3px solid var(--Purple);
+}
+
+.login-form .button-primary {
+    display: inline-block;
+    padding: var(--mp-0-75);
+    cursor: pointer;
+    background-color: var(--Pure-Black);
+    color: var(--Pale-Gray);
+    border-radius: var(--mp-2);
+    margin-top: var(--mp-0-75);
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.button-primary:hover {
+    background-color: var(--Purple);
+    color: var(--Pale-Gray);
+}
+
+.link-primary {
+    color: var(--accent-primary);
+}
+
+.link-primary:hover {
+    text-decoration: underline;
+}
+
+.login-title{
+    font-size: var(--h2-font-size);
+    font-weight: var(--font-medium);
+}
+
+.k{
+    color: var(--Purple);
+}
