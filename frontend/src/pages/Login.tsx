@@ -1,20 +1,39 @@
 // frontend/src/pages/Home.tsx
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/login.css"; 
 import useAuth from "hooks/useAuth";
+import { useAuthContext } from "contexts/AuthContext";
 
 const Login = () => {
     const { message, login } = useAuth();
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const {keys} = useAuthContext();
+    const navigate = useNavigate();
 
-    const handleLogin = () => {
+    const handleLogin = async() => {
         console.log('Username : ', username);
         console.log('Password : ', password);
-        login(username, password)
+        
+        const connect = await login(username, password);
+        
+        if (connect == "LOGIN_SUCCESS"){
+        console.log("keys");
+        
+      navigate ("/dashboard");
     }
+    }
+
+  useEffect(()=>{
+    if (keys.accessToken){
+        console.log("keys");
+        
+      navigate ("/dashboard");
+    }
+    
+  }, [keys])
 
   return (
     <>

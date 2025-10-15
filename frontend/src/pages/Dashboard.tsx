@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/dashboard.css";
+import { useAuthContext } from "contexts/AuthContext";
+import useAuth from "../hooks/useAuth" 
+import { useNavigate } from "react-router-dom";
+import Avatars from "../components/Avatars";
 
 interface Message {
   id: number;
@@ -38,6 +42,24 @@ const Dashboard: React.FC = () => {
       ],
     },
   ]);
+  const { keys, user } = useAuthContext();
+  const navigate = useNavigate();
+  const { protect } = useAuth();
+
+   useEffect(()=> {
+    if(!keys.accessToken || !keys.refreshToken) {
+      navigate('/login');
+    }
+    
+    protect();
+
+    // if (!user?.profileImage) {
+    //   navigate('/avatar')
+    // }
+
+  }, []);
+
+
 
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(
     conversations[2]
@@ -64,42 +86,57 @@ const Dashboard: React.FC = () => {
     setNewMessage("");
   };
 
-    const userAction = document.querySelector('.user-action') ;
-    const modal = document.querySelector('.modal-user');
-    const conversationContent = document.querySelector('.chat_content');
+  const userAction = document.querySelector('.user-action') ;
+  const modal = document.querySelector('.modal-user');
+  const conversationContent = document.querySelector('.chat_content');
 
-    userAction?.addEventListener('click', function() {
-        if (modal?.classList.contains('active')) {
-            // Fermer le modal
-            // modal.classList.remove('active');
-            // conversationContent?.classList.remove('scaled');
-        } else {
-          console.log("modale-activer");
+  userAction?.addEventListener('click', function() {
+    if (modal?.classList.contains('active')) {
+      // Fermer le modal
+      // modal.classList.remove('active');
+      // conversationContent?.classList.remove('scaled');
+    } else {
+      console.log("modale-activer");
           
-            // Ouvrir le modal
-            modal?.classList.add('active');
-            conversationContent?.classList.add('scaled');
-        }
-    });
+      // Ouvrir le modal
+      modal?.classList.add('active');
+      conversationContent?.classList.add('scaled');
+    }
+  });
 
-    // Fermer le modal en cliquant sur le fond
-    modal?.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            conversationContent?.classList.remove('scaled');
-        }
-    });
+  // Fermer le modal en cliquant sur le fond
+  modal?.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.classList.remove('active');
+      conversationContent?.classList.remove('scaled');
+    }
+  });
+
+  if (!user?.profileImage) {
+    return (
+      <Avatars />
+    );
+  }
 
   return (
     <div className="dashboard">
       {/* Sidebar */}
       <div className="sidebar">
-        <h1>Message</h1>
+
+        <div className="sidebar_message">
+          
+          <i className="icon icon_message">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="32" height="32" fill="none"/><path d="M45.15,230.11A8,8,0,0,1,32,224V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V192a8,8,0,0,1-8,8H80Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+          </i>
+          <h3>Message</h3> 
+          
+        </div>
+
         <div className="sidebar__search">
           <input className="input_search" type="text" placeholder="Recherche..." />
-        <i className="icon icon-search">
+          <i className="icon icon-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
-        </i>
+          </i>
         </div>
 
         <div style={{flex:1, overflowY:"auto"}}>
@@ -128,43 +165,40 @@ const Dashboard: React.FC = () => {
             <span className="sidebar__profile-name">Moi</span>
             <span className="sidebar__profile-status">En ligne</span>
           </div>
-        </div>
+            <div className="user-action">
+              <i className="icon icon-menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z"></path></svg>
+              </i>
+          </div>
 
-        <div className="user-action">
-                        <i className="icon icon-menu">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                                viewBox="0 0 256 256">
-                                <path
-                                    d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z">
-                                </path>
-                            </svg>
-                        </i>
-                    </div>
+        </div>
       </div>
 
       {/* Chat area */}
       <div className="chat">
         <div className="modal-user">
-                    <div className="modal-user-content">
-                        <div className="modal-card">
-                            <section className="modal-card-titre semi-bold">Jean Dupont</section>
+          <div className="modal-user-content">
+            <div className="modal-card">
+              <section className="modal-card-titre semi-bold"> {user?.username} </section>
 
-                            <section className="modal-btns">
-                                <span>Marquer hors ligne</span>
-                                <span>Se déconnecter</span>
-                            </section>
-                        </div>
+              <section className="modal-btns">
+                <span>Marquer hors ligne</span>
+                <span>Se déconnecter</span>
+              </section>
+            </div>
 
-                        <div className="modal-card">
-                            <section className="modal-card-titre semi-bold">Groupe</section>
+            <div className="modal-card">
+              <section className="modal-card-titre semi-bold">Groupe</section>
 
-                            <section className="modal-btns">
-                                <span>Créer un groupe</span>
-                                <span>Rejoindre un groupe</span>
-                            </section>
-                        </div>
-                    </div>
-                </div>
+                <section className="modal-btns">
+                  <span>Créer un groupe</span>
+                  <span>Rejoindre un groupe</span>
+                </section>
+            </div>
+          </div>
+        </div>
+
         {selectedConv ? (
           <>
           <div className="chat_content">
@@ -208,8 +242,6 @@ const Dashboard: React.FC = () => {
         ) : (
           <div className="chat__empty">Sélectionnez une conversation</div>
         )}
-
-        
       </div>
     </div>
   );
