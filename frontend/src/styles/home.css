@@ -1,0 +1,220 @@
+
+:root {
+
+    /*--========== color ==========*/
+    
+    --Cream: #F5F5EF;
+    --Chartreuse: #CBCF4B;
+    --Purple: #A296EE;
+    --Pure-Black: #000000;
+    --Bittersweet: #EE6352;
+	--Pale-Gray: #e9e9e9;
+	--Camel-Case: #4467AE;
+	--Grey-Light: #F6F6F6;
+	--Yellow-Gren: #99C24D;
+
+	--header-height: var(--mb-3);
+
+	/*--========== font & typography ==========*/
+
+	--big-font-size: 2rem;
+	--bigger-font-size: 3rem;
+	--h1-font-size: 1.5rem;
+	--h2-font-size: 1.25rem;
+	--h3-font-size: 1.125rem;
+	--normal-font-size: .938rem;
+	--small-font-size: .813rem;
+	--smaller-font-size: .75rem;
+
+	/*--========== font weight ==========*/
+
+	--font-light: 300;
+	--font-regular: 400;
+	--font-medium: 500;
+	--font-semi-bold: 600;
+	--font-bold: 700;
+
+	/*--========== margenes ==========*/
+
+	--mp-0-25: .25rem;
+	--mp-0-5: .5rem;
+	--mp-0-75: .75rem;
+	--mp-1: 1rem;
+	--mp-1-5: 1.5rem;
+	--mp-2: 2rem;
+	--mp-2-5: 2.5rem;
+	--mp-3: 3rem;
+
+	/*--========== Z-index ==========*/
+
+	--Z-tooltip: 10;
+	--Z-fixed: 100;
+	--Z-modal: 1000;
+
+	/*--========== hover overlay ==========*/
+
+	--img-scale: scale(1.1);
+    --transition-speed: cubic-bezier(.28, .11, .32, 1);
+    --transition-fast: .21s var(--transition-speed);
+    --transition-default: .42s var(--transition-speed);
+    --transition-slow: 1.32s var(--transition-speed);
+	
+}
+
+
+
+.section-container:first-child{
+    background-image: url("../../public/assets/img/peeps-avatar-alpha-2.png");
+    height: 100vh;
+    width: 100%;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;   /* empile le petit et grand texte */
+    justify-content: center;
+}
+
+.intro-text{
+    font-weight: var(--font-medium);
+    color: var(--Grey-Light);
+
+}
+
+.k{
+    color: var(--Purple);
+}
+
+.style-text{
+    font-family: 'Telma', cursive;
+}
+.big-text{
+    color: var(--Grey-Light);
+}
+
+
+.intro-text, .btn-intro, .big-text {
+z-index: var(--Z-tooltip);
+}
+
+.section-container:first-child::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* hauteur de l'ombre */
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+  /* background-color:rgba(0,0,0,0.4) ; */
+}
+
+.btn-intro{
+    background-color: var(--Grey-Light);
+    color: var(--Pure-Black);
+    padding: var(--mp-0-75) var(--mp-1-5);
+    border-radius: var(--mp-2);
+    margin-top: var(--mp-1);
+}
+
+
+.btn-intro:hover{
+    background-color: var(--Purple);
+    color: var(--Pale-Gray);
+}
+
+.btn-outro{
+    background-color: var(--Pure-Black);
+    color: var(--Grey-Light);
+    padding: var(--mp-0-75) var(--mp-1-5);
+    border-radius: var(--mp-2);
+    margin-top: var(--mp-1);
+    margin-bottom: 50px;
+}
+
+.btn-outro:hover{
+    background-color: var(--Purple);
+    color: var(--Pale-Gray);
+}
+
+.icon-container{
+    background: linear-gradient(to top, transparent, rgba(0,0,0,0.5));
+    height: 100%;
+    width: 100%;
+    
+}
+
+.main-description{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 50px;
+    
+    
+}
+
+.descp-grid{
+  margin-bottom: 20px;
+}
+
+.descp-grid-left{
+    display: flex;
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.descp-text-animation{
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  margin-top: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  height: 400 px;
+  width: 800 px;
+  gap: 20px;
+}
+
+.descp-text-animation:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+}
+
+.descp-text-animation img {
+  max-width: 65%;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+.descp-text-animation .content {
+  padding: 18px;
+  text-align: left;
+}
+
+.descp-text-animation h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--Pure-Black);
+}
+
+.descp-text-animation p {
+  font-size: 14px;
+  color: var(--Purple);
+  margin-bottom: 12px;
+}
+
+/* .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tags span {
+  background: var(--bg);
+  color: var(--blanc);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+} */
