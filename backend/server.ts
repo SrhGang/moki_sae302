@@ -9,6 +9,7 @@ import loginRoute from './routes/loginRoute';
 import avatarRoute from './routes/avatarRoute';
 import tokenRoute from './routes/tokenRoute';
 import logoutRoute from './routes/logoutRoute';
+import userRoute from './routes/userRoute';
 
 import connectDB from './config/db';
 import { corsOptions, corsMiddleware } from './config/cors';
@@ -28,6 +29,7 @@ app.use('/api/login', loginRoute);
 app.use('/api/avatar', avatarRoute);
 app.use('/api/refresh', tokenRoute);
 app.use('/api/logout', logoutRoute);
+app.use('/api/protect', userRoute);
 
 
 app.listen(3000, () => {

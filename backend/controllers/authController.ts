@@ -116,3 +116,30 @@ export const logout = (req: Request, res: Response) => {
         return;
     }
 };
+
+export const protect = async (req: Request, res: Response, next: Function) => {
+    console.log("J'ai recu une requete pour protect");
+    
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json({ error: 'Access token required', code: "MISSING_TOKEN" });
+            return;
+        }
+
+        const token = authHeader.substring(7);
+        const decoded = jwt.verify(token, secretKey) as { uid: string; username: string };
+        
+        const user = await User.findOne({ uid: decoded.uid });
+        if (!user) {
+            res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
+            return;
+        }
+
+        res.status(200).json({  username: user.username, profileImage: user.profilePicture, code: "USER_AUTHENTICATED" }); 
+        return;
+    } catch (e) {
+        res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
+        return;
+    }
+}
