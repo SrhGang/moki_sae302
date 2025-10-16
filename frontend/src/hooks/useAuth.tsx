@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuthContext } from "contexts/AuthContext";
+import { useApiCall } from "hooks/useApiCall";
+import { AccessKey, LoginResult, User } from 'types';
+
 const useAuth = () => {
   const[message, setMessage] = useState<string>();
 
   const navigate = useNavigate();
+  const {apiCall} = useApiCall();
+  const { setKeys, setUser } = useAuthContext();
 
   useEffect(() => {
   }, []);
 
-  const apiCall = (endpoint: any, successCallback: Function, errorMessage: string) => {
-    
-  };
+
 
   const signup = async (username:string, password:string) => {
     if (!username || !password){ 
@@ -19,20 +23,19 @@ const useAuth = () => {
       return;
     }
   
- try {
-      const response = fetch('http://10.51.84.189:3000/api/signup', {
+    try {
+      const response = await apiCall("/api/signup", {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({username, password})
       });
-      console.log(await response);
-      
+        
     } catch (e) {
-      
+        
     }
-     return { login, logout, message };
+    return { login, logout, message };
   }
 
   const login = async (username:string, password:string) => {
@@ -42,25 +45,44 @@ const useAuth = () => {
     }
 
     try {
-      const response = fetch('http://10.51.84.189:3000/api/login', {
+
+      const response: LoginResult = await apiCall("/api/login", {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({username, password})
       });
-      console.log(await response);
+      console.log( response);
+      const newKeys: AccessKey = response.token;
+      await setKeys(newKeys);
+
+      return response.code;
       
     } catch (e) {
       
     }
   };
 
+  const protect = async () => {
+    const getUser: User = await apiCall('/api/protect/', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withAuth: true
+    });
+
+    setUser(getUser);
+
+    return getUser;
+  }
+
   const logout = () => {
     navigate('/login');
   };
 
-  return { signup, login, logout, message };
+  return { signup, login, logout, protect, message };
 };
 
 export default useAuth;
