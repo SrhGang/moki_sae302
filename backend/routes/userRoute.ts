@@ -1,8 +1,8 @@
 import express from 'express';
-import { protect } from '../controllers/authController';
+import { protect, getUserInfo } from '../controllers/authController';
 
 const router = express.Router();
 
-router.post('/', protect);
+router.post('/', protect, getUserInfo);
 
 export default router;

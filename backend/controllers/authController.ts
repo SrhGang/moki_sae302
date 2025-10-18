@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Server } from "socket.io";
 
 const secretKey = process.env.SECRET_KEY!;
 const refreshSecret = process.env.REFRESH_SECRET || "dev";
@@ -118,8 +119,6 @@ export const logout = (req: Request, res: Response) => {
 };
 
 export const protect = async (req: Request, res: Response, next: Function) => {
-    console.log("J'ai recu une requete pour protect");
-    
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -136,10 +135,22 @@ export const protect = async (req: Request, res: Response, next: Function) => {
             return;
         }
 
-        res.status(200).json({  username: user.username, profileImage: user.profilePicture, code: "USER_AUTHENTICATED" }); 
-        return;
+        (req as any).user = {
+            username: user.username,
+            profileImage: user.profilePicture
+        };
+        
+        next();
     } catch (e) {
         res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
         return;
     }
+}
+
+export const getUserInfo = async (req: Request, res: Response) => {
+    res.status(200).json({ 
+        username: (req as any).user.username, 
+        profileImage: (req as any).user.profileImage, 
+        code: "USER_AUTHENTICATED" 
+    });
 }
