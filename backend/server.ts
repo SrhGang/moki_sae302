@@ -14,7 +14,6 @@ import tokenRoute from './routes/tokenRoute';
 import logoutRoute from './routes/logoutRoute';
 import userRoute from './routes/userRoute';
 import messageRoute from './routes/messageRoute';
-
 import connectDB from './config/db';
 import { corsOptions, corsMiddleware } from './config/cors';
 
@@ -26,11 +25,8 @@ const connectedUsers = new Map<string, string>();
 
 connectDB();
 
-// ---- SOIT corsOptions ou corsMiddleware
 app.use(cors(corsOptions));
-// app.use(corsMiddleware); 
-
-
+app.use(corsMiddleware);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -68,6 +64,15 @@ io.on('connection', (socket) => {
             }
         }
     });
+
+    // socket.on('search_user', (username) => {
+    //     for (const [storedUsername, socketId] of connectedUsers.entries()) {
+    //         if (storedUsername === username) {
+    //             io.to(socket.id).emit('user_found', { username: storedUsername });
+    //             return;
+    //         }
+    //     }
+    // });
 });
 
 server.listen(3000, () => {

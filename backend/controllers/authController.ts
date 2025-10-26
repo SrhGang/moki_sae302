@@ -120,49 +120,96 @@ export const logout = (req: Request, res: Response) => {
 
 export const protect = async (req: Request, res: Response, next: Function) => {
     try {
-        console.log('🔒 Protection middleware called');
-        console.log('Headers:', req.headers);
-        
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('❌ No Bearer token found in authorization header');
             res.status(401).json({ error: 'Access token required', code: "MISSING_TOKEN" });
             return;
         }
 
         const token = authHeader.substring(7);
-        console.log('🎟️ Token extracted from header');
-        
         const decoded = jwt.verify(token, secretKey) as { uid: string; username: string };
-        console.log('✅ Token verified successfully');
-        console.log('👤 Decoded token:', { uid: decoded.uid, username: decoded.username });
         
         const user = await User.findOne({ uid: decoded.uid });
         if (!user) {
-            console.log('❌ No user found with uid:', decoded.uid);
             res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
             return;
         }
 
-        console.log('✅ User found:', user.username);
         (req as any).user = {
             username: user.username,
             profileImage: user.profilePicture
         };
         
-        console.log('✅ User data attached to request');
         next();
     } catch (e) {
-        console.log('❌ Error in protect middleware:', e);
         res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
         return;
     }
 }
 
 export const getUserInfo = async (req: Request, res: Response) => {
-    res.status(200).json({ 
-        username: (req as any).user.username, 
-        profileImage: (req as any).user.profileImage, 
-        code: "USER_AUTHENTICATED" 
-    });
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json({ error: 'Access token required', code: "MISSING_TOKEN" });
+            return;
+        }
+        const token = authHeader.substring(7);
+        res.status(200).json({ 
+            username: (req as any).user.username, 
+            profileImage: (req as any).user.profileImage, 
+            code: "USER_AUTHENTICATED" 
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Internal server error', code: "INTERNAL_SERVER_ERROR" });
+    }
+}
+
+export const searchUsers = async (req: Request, res: Response) => {
+    try {
+        const { username, hasAvatar, online } = req.query;
+
+        // Construire la requête de recherche
+        let query: any = {};
+        
+        // Filtrer par nom d'utilisateur
+        if (username) {
+            query.username = { $regex: new RegExp(String(username), 'i') };
+        }
+
+        // Filtrer les utilisateurs avec avatar
+        if (hasAvatar === 'true') {
+            query.profilePicture = { $exists: true, $ne: null };
+        }
+
+        // Exclure l'utilisateur actuel des résultats
+        query.username = { $ne: (req as any).user.username };
+
+        const users = await User.find(query)
+            .select('username profilePicture lastActive')
+            .limit(10);
+
+        // Si le filtre "en ligne" est activé, on filtre les résultats
+        let filteredUsers = users;
+        if (online === 'true') {
+            const now = new Date();
+            const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+            filteredUsers = users.filter(user => 
+                user.lastActive && user.lastActive > fiveMinutesAgo
+            );
+        }
+
+        res.json({
+            users: filteredUsers,
+            total: filteredUsers.length,
+            code: "SEARCH_SUCCESS"
+        });
+
+    } catch (error) {
+        console.error('Erreur lors de la recherche:', error);
+        res.status(500).json({ 
+            error: 'Erreur lors de la recherche',
+            code: "SEARCH_ERROR"
+        });
+    }
 }
