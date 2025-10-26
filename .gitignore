@@ -1,2 +1,12 @@
 node_modules
 test.txt
+
+# Ignore le fichier json inutile crée automatiquement lors de l'installation des packages
+package-lock.json
+.DS_Store
+.vscode/
+dist
+.env
+coverage
+logs
+*.log
