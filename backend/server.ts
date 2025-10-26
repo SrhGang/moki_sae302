@@ -26,8 +26,11 @@ const connectedUsers = new Map<string, string>();
 
 connectDB();
 
+// ---- SOIT corsOptions ou corsMiddleware
 app.use(cors(corsOptions));
-app.use(corsMiddleware);
+// app.use(corsMiddleware); 
+
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -120,28 +120,40 @@ export const logout = (req: Request, res: Response) => {
 
 export const protect = async (req: Request, res: Response, next: Function) => {
     try {
+        console.log('🔒 Protection middleware called');
+        console.log('Headers:', req.headers);
+        
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log('❌ No Bearer token found in authorization header');
             res.status(401).json({ error: 'Access token required', code: "MISSING_TOKEN" });
             return;
         }
 
         const token = authHeader.substring(7);
+        console.log('🎟️ Token extracted from header');
+        
         const decoded = jwt.verify(token, secretKey) as { uid: string; username: string };
+        console.log('✅ Token verified successfully');
+        console.log('👤 Decoded token:', { uid: decoded.uid, username: decoded.username });
         
         const user = await User.findOne({ uid: decoded.uid });
         if (!user) {
+            console.log('❌ No user found with uid:', decoded.uid);
             res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
             return;
         }
 
+        console.log('✅ User found:', user.username);
         (req as any).user = {
             username: user.username,
             profileImage: user.profilePicture
         };
         
+        console.log('✅ User data attached to request');
         next();
     } catch (e) {
+        console.log('❌ Error in protect middleware:', e);
         res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
         return;
     }
