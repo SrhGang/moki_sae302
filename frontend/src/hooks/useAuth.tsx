@@ -10,9 +10,20 @@ const useAuth = () => {
 
   const navigate = useNavigate();
   const {apiCall} = useApiCall();
-  const { setKeys, setUser } = useAuthContext();
+  const { setKeys, setUser, clearAuth } = useAuthContext();
 
   useEffect(() => {
+    // Vérifie l'authentification au chargement
+    const checkAuth = async () => {
+      try {
+        const test = await protect();
+        console.log('test : ', test);
+        
+      } catch (error) {
+        // logout();
+      }
+    };
+    checkAuth();
   }, []);
 
 
@@ -68,17 +79,21 @@ const useAuth = () => {
     const getUser: User = await apiCall('/api/protect/', {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json"
       },
       withAuth: true
     });
 
     setUser(getUser);
+    console.log('/api/protect/ :', getUser);
+    
 
     return getUser;
   }
 
   const logout = () => {
+    clearAuth(); // Nettoie les données d'authentification
+    localStorage.clear(); // Nettoie le localStorage
     navigate('/login');
   };
 

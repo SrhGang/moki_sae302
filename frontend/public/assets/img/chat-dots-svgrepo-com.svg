@@ -15,13 +15,13 @@
     <g id="Shape" clip-path="url(#clip_1)">
       <use stroke="none" fill="#1C274C" xlink:href="#path_2" fill-rule="evenodd" />
       <g clip-path="url(#clip_2)">
-        <use xlink:href="#path_2" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="60 60" />
+        <use xlink:href="#path_2" fill="none" stroke="#FFFFFF" strokeWidth="2" stroke-dasharray="60 60" />
       </g>
     </g>
     <g id="Group" transform="translate(251.81668 332.3333)" clip-path="url(#clip_1)">
-      <path d="M0 1L30 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" stroke-width="67" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M133.033 1L163.033 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" stroke-width="67" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M266.367 1L296.367 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" stroke-width="67" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M0 1L30 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" strokeWidth="67"   />
+      <path d="M133.033 1L163.033 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" strokeWidth="67"   />
+      <path d="M266.367 1L296.367 1" id="Line" fill="none" fill-rule="evenodd" stroke="currentColor" strokeWidth="67"   />
     </g>
   </g>
 </svg>

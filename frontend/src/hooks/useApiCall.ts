@@ -23,6 +23,11 @@ export const useApiCall = () => {
     
     if (withAuth && keys?.accessToken) {
       headers.Authorization = `Bearer ${keys.accessToken}`;
+    } else {
+      console.log('⚠️ No access token available for authenticated request');
+      if (withAuth) {
+        throw new Error('No access token available for authenticated request');
+      }
     }
 
     const config: RequestInit = { ...fetchOptions, headers };
@@ -35,7 +40,7 @@ export const useApiCall = () => {
 
     console.log('Request config:', config);
 
-    const response = await fetch(`http://10.51.84.189:3000${endpoint}`, config);
+    const response = await fetch(`http://localhost:3000${endpoint}`, config);
     
     if (!response.ok) {
       const errorData = await response.json();

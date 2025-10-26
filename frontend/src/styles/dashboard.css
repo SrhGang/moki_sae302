@@ -192,6 +192,15 @@ body {
   height: var(--mp-2);
   border-radius: 50%;
   background-color: var(--Bittersweet);
+  overflow: hidden;
+}
+
+.sidebar__profile-avatar img {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sidebar__profile-info {

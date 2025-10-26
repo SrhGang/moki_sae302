@@ -170,7 +170,6 @@ export const loadUserFromStorage = async (): Promise<{ user: User | null; access
       return { user: migratedUser, accessKey };
     }
     
-    
     return { user, accessKey };
   } catch (error) {
     
@@ -185,11 +184,6 @@ export const clearStorageData = async (): Promise<void> => {
     await Promise.all([
       localStorage.removeItem(STORAGE_KEYS.ACCESS_KEY),
       localStorage.removeItem(STORAGE_KEYS.USER_DATA),
-      localStorage.removeItem('notes'),
-      localStorage.removeItem('notes_last_update'),
-      localStorage.removeItem('ressources'),
-      localStorage.removeItem('ressources_last_update'),
-      
     ]);
     
     
@@ -211,9 +205,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ✅ Mémoriser setKeys pour éviter les re-créations
   const setKeys = useCallback(async (keys: AccessKey) => {
     
-    
-
-    
     // Sauvegarder dans le state
     dispatch({ type: 'SET_KEYS', payload: keys });
     
@@ -227,8 +218,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [state.keys]);
 
   // ✅ Mémoriser les autres actions
-  const setUser = useCallback((user: User | null) => {
+  const setUser = useCallback(async (user: User | null) => {
     dispatch({ type: 'SET_USER', payload: user });
+    if (user) {
+      const accessKey = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCESS_KEY) || '{}');
+      await saveUserToStorage(user, accessKey);
+    }
   }, []);
 
   const setError = useCallback((error: string | null) => {
@@ -252,17 +247,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        
-        
         const { user, accessKey } = await loadUserFromStorage();
+        console.log("{ user, accessKey } : ", { user, accessKey });
         
+        if (user && accessKey) {
+          dispatch({ type: 'SET_USER', payload: user });
+          dispatch({ type: 'SET_KEYS', payload: accessKey });
+        }
 
       } catch (error) {
-        
         dispatch({ type: 'SET_ERROR', payload: 'Erreur lors du chargement des données d\'authentification' });
       } finally {
         dispatch({ type: 'SET_INITIALIZED', payload: true });
-        
       }
     };
 

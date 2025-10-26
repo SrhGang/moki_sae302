@@ -4,6 +4,7 @@ import { useAuthContext } from "contexts/AuthContext";
 import useAuth from "../hooks/useAuth" 
 import { useNavigate } from "react-router-dom";
 import Avatars from "../components/Avatars";
+import { useSocket } from "../hooks/useSocket";
 
 interface Message {
   id: number;
@@ -45,6 +46,7 @@ const Dashboard: React.FC = () => {
   const { keys, user } = useAuthContext();
   const navigate = useNavigate();
   const { protect } = useAuth();
+  const { socket, sendMessage, subscribeToEvent, unsubscribeFromEvent} = useSocket();
 
    useEffect(()=> {
     if(!keys.accessToken || !keys.refreshToken) {
@@ -126,7 +128,7 @@ const Dashboard: React.FC = () => {
         <div className="sidebar_message">
           
           <i className="icon icon_message">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="32" height="32" fill="none"/><path d="M45.15,230.11A8,8,0,0,1,32,224V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V192a8,8,0,0,1-8,8H80Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="32" height="32" fill="none"/><path d="M45.15,230.11A8,8,0,0,1,32,224V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V192a8,8,0,0,1-8,8H80Z" fill="none" stroke="currentColor"  strokeWidth="16"/></svg>
           </i>
           <h3>Message</h3> 
           
@@ -160,7 +162,9 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="sidebar__profile">
-          <div className="sidebar__profile-avatar"></div>
+          <div className="sidebar__profile-avatar">
+            <img src={user?.profileImage} alt=""/>
+          </div>
           <div className="sidebar__profile-info">
             <span className="sidebar__profile-name">Moi</span>
             <span className="sidebar__profile-status">En ligne</span>

@@ -8,7 +8,7 @@
   </defs>
   <g id="Oval">
     <g clip-path="url(#clip_1)">
-      <use xlink:href="#path_1" fill="none" stroke="#AFBCC2" stroke-width="4" />
+      <use xlink:href="#path_1" fill="none" stroke="#AFBCC2" strokeWidth="4" />
     </g>
   </g>
 </svg>
