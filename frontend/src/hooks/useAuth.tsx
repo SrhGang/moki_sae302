@@ -1,26 +1,88 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuthContext } from "contexts/AuthContext";
+import { useApiCall } from "hooks/useApiCall";
+import { AccessKey, LoginResult, User } from 'types';
+
 const useAuth = () => {
+  const[message, setMessage] = useState<string>();
 
   const navigate = useNavigate();
+  const {apiCall} = useApiCall();
+  const { setKeys, setUser } = useAuthContext();
 
   useEffect(() => {
   }, []);
 
-  const apiCall = (response: any, successCallback: Function, errorMessage: string) => {
 
+
+  const signup = async (username:string, password:string) => {
+    if (!username || !password){ 
+      setMessage("Veuillez renseigner le mot de passe et le nom d'utilisateur.")
+      return;
+    }
+  
+    try {
+      const response = await apiCall("/api/signup", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({username, password})
+      });
+        
+    } catch (e) {
+        
+    }
+    return { login, logout, message };
+  }
+
+  const login = async (username:string, password:string) => {
+    if(!username || !password){
+      setMessage("Nom d'ultilisateur ou mot de passe incorrect.")
+      return;
+    }
+
+    try {
+
+      const response: LoginResult = await apiCall("/api/login", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({username, password})
+      });
+      console.log( response);
+      const newKeys: AccessKey = response.token;
+      await setKeys(newKeys);
+
+      return response.code;
+      
+    } catch (e) {
+      
+    }
   };
 
-  const login = async () => {
- 
-  };
+  const protect = async () => {
+    const getUser: User = await apiCall('/api/protect/', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withAuth: true
+    });
+
+    setUser(getUser);
+
+    return getUser;
+  }
 
   const logout = () => {
     navigate('/login');
   };
 
-  return { login, logout };
+  return { signup, login, logout, protect, message };
 };
 
 export default useAuth;
