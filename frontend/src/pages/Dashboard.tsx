@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
 
    useEffect(()=> {
     if(!keys.accessToken || !keys.refreshToken) {
-      navigate('/login');
+      // navigate('/login');
     }
     
     protect();
@@ -121,7 +121,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className="sidebar" style={{background: "var(--Crean)"}}>
 
         <div className="sidebar_message">
           
@@ -160,7 +160,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="sidebar__profile">
-          <div className="sidebar__profile-avatar"></div>
+          <div className="sidebar__profile-avatar"><img src={`${user.profileImage}`} alt="" /></div>
           <div className="sidebar__profile-info">
             <span className="sidebar__profile-name">Moi</span>
             <span className="sidebar__profile-status">En ligne</span>
@@ -233,7 +233,7 @@ const Dashboard: React.FC = () => {
               />
               <button onClick={handleSend} className="btn-send">
                 <i className="icon icon-arrow-top">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
                 </i>
                </button> 
             </div>

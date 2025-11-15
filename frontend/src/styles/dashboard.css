@@ -4,7 +4,7 @@
 
     /*--========== color ==========*/
     
-    --Cream: #F5F5EF;
+    --Cream: #FFFFFF;
     --Chartreuse: #CBCF4B;
     --Purple: #A296EE;
     --Pure-Black: #000000;
@@ -87,15 +87,13 @@ body {
 /* ====== SIDEBAR ====== */
 .sidebar {
   width: max-content;
-  background-color: white;
+  background: var(--Cream) !important;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--Pale-Gray);
   padding: var(--mp-0-75);
   border-radius: var(--mp-1);
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
   gap: var(--mp-0-5);
-  
 }
 
 .sidebar_message{
@@ -183,30 +181,37 @@ body {
 .sidebar__profile {
   display: flex;
   align-items: center;
-  padding: 1rem;
-  border-radius: var(--mp-0-75);
 }
 
 .sidebar__profile-avatar {
+  overflow: hidden;
   width: var(--mp-2);
   height: var(--mp-2);
   border-radius: 50%;
-  background-color: var(--Bittersweet);
+  background-color: var(--Pale-Gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__profile-avatar img {
+  width: 100%;
+  height: 100%;
 }
 
 .sidebar__profile-info {
-  margin-left: 0.5rem;
-  font-size: 0.85rem;
+  margin-left: var(--mp-0-75);
   display: flex;
   flex-direction: column;
 }
 
 .sidebar__profile-name {
-  font-weight: 600;
+  font-weight: var(--font-bold);
 }
 
 .sidebar__profile-status {
   color: var(--Purple);
+  font-size: var(--small-font-size);
 }
 
 
@@ -226,6 +231,7 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--Grey-Light);
+  padding: var(--mp-1);
 }
 
 .chat .chat_content {
@@ -243,9 +249,9 @@ body {
   align-items: center;
   gap: var(--mp-0-5);
   background-color: var(--Pale-Gray);
-  border-bottom: 1px solid var(--Pale-Gray);
   padding: var(--mp-0-5);
   border-radius: var(--mp-1);
+  margin-bottom: var(--mp-0-5);
 }
 
 .chat__header-avatar {
@@ -266,61 +272,57 @@ body {
 }
 
 .chat__header-name {
-  font-weight: 600;
+  font-weight: var(--font-semi-bold);
 }
 
 .chat__header-status {
-  font-size: 0.8rem;
+  font-size: var(--small-font-size);
   color: var(--Purple);
 }
 
 .chat__messages {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: var(--mp-1) 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--mp-0-5);
 }
 
 .message {
   max-width: 70%;
-  padding: 0.75rem 1rem;
-  border-radius: 1.25rem;
-  font-size: 0.95rem;
+  padding: var(--mp-0-5) var(--mp-1);
+  border-radius: var(--mp-1-5);
   line-height: 1.4;
 }
 
 .message--me {
   align-self: flex-end;
   background-color: var(--Purple);
-  color: white;
-  border-bottom-right-radius: 0.25rem;
+  color: var(--Grey-Light);
+  border-bottom-right-radius: var(--mp-0-25);
 }
 
 .message--other {
   align-self: flex-start;
   background-color: var(--Pure-Black);
   color: var(--Pale-Gray);
-  border-bottom-left-radius: 0.25rem;
+  border-bottom-left-radius: var(--mp-0-25);
 }
 
 .chat__input {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background-color: white;
-  border-top: 1px solid var(--Pale-Gray);
-  padding: 1rem;
+  gap: var(--mp-0-75);
 }
 
 .chat__input input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 1.5rem;
-  border: 1px solid var(--Pale-Gray);
-  outline: none;
+  padding: var(--mp-0-75) var(--mp-1);
+  border-radius: var(--mp-2);
   transition: border var(--transition-fast);
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
+  background-color: var(--Cream);
 }
 
 .chat__input input:focus {
@@ -357,6 +359,7 @@ body {
     height: var(--mp-2-5) !important;
     background-color: var(--Purple);
     border-radius: var(--mp-2);
+    color: var(--Grey-Light);
     transition: background-color var(--transition-default);
 }
 
@@ -480,9 +483,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: wrap;
+  flex-wrap: wrap;
   gap: var(--mp-1);
-  flex-direction: wrap;
   background-color: rgb(249, 243, 157);
 }
 
@@ -494,6 +496,10 @@ body {
   justify-content: center;
   border-radius: 50%;
   overflow: hidden;
+}
+
+.list-avatar .avatar-profil.--selected {
+  border: 1px solid var(--Camel-Case);
 }
 
 .avatar-profil .avatart-item {

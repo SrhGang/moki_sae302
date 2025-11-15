@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/NavBar.css"
+import { useAvatar } from "../hooks/useAvatar";
 
 const Avatars = ()=>{
-    const [selected, setSelected] = useState(0);
+    const [selected, setSelected] = useState<number>(0);
+    const { updateAvatar } = useAvatar();
 
     return(
         <>
@@ -16,14 +18,19 @@ const Avatars = ()=>{
                 <div className="list-avatar">
                     {Array.from({length: 9}).map((_, index) => 
                     (
-                        <section className="avatar-profil" key={index}>
+                        <section onClick={()=> {
+                            setSelected(index);
+                            
+                        }} className={`avatar-profil ${selected === index ? '--selected' : ''}`} key={index}>
                             <img className="avatart-item" src={`./assets/img/peeps-avatar-alpha-${index}.png`}/>
                         </section>
                     ))}
                 </div>
 
                 <section className="btn-valid-chose">
-                    <button className="btn-valid" id="btnValidAvatar" type="button">Valider</button>
+                    <button onClick={()=> {
+                        updateAvatar(`./assets/img/peeps-avatar-alpha-${selected}.png`);
+                    }} className="btn-valid" id="btnValidAvatar" type="button">Valider</button>
                 </section>
             </div>
         </div>

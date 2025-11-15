@@ -64,18 +64,22 @@ const useAuth = () => {
     }
   };
 
-  const protect = async () => {
-    const getUser: User = await apiCall('/api/protect/', {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      withAuth: true
-    });
+ const protect = async () => {
+    try {
+      const getUser: User = await apiCall('/api/protect/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
 
-    setUser(getUser);
+setUser(getUser);
+      console.log('/api/protect/ :', getUser);
 
-    return getUser;
+return getUser;
+    } catch (e) {
+      logout();
+    }
   }
 
   const logout = () => {
