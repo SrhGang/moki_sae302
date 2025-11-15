@@ -6,7 +6,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import jwt from 'jsonwebtoken';
+
 import signupRoute from './routes/signupRoute';
 import loginRoute from './routes/loginRoute';
 import avatarRoute from './routes/avatarRoute';
@@ -14,14 +14,17 @@ import tokenRoute from './routes/tokenRoute';
 import logoutRoute from './routes/logoutRoute';
 import userRoute from './routes/userRoute';
 import messageRoute from './routes/messageRoute';
+
+import socketHandlers from './socket/index';
+import { connectedUsers } from './utilis/connectedUsers';
+
 import connectDB from './config/db';
 import { corsOptions, corsMiddleware } from './config/cors';
+
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, { cors: corsOptions });
-
-const connectedUsers = new Map<string, string>();
 
 connectDB();
 
@@ -38,47 +41,13 @@ app.use('/api/logout', logoutRoute);
 app.use('/api/protect', userRoute);
 app.use('/api/messages', messageRoute);
 
-io.on('connection', (socket) => {
-    socket.on('authenticate', (token) => {
-        try {
-            const decoded = jwt.verify(token, process.env.SECRET_KEY!) as { username: string };
-            connectedUsers.set(decoded.username, socket.id);
-            socket.join(decoded.username);
-        } catch (error) {
-            socket.disconnect();
-        }
-    });
+io.on('connection', (socket) => { socketHandlers(socket, io); });
 
-    socket.on('send_message', (data) => {
-        const recipientSocketId = connectedUsers.get(data.recipient);
-        console.log('🎯 Socket ID du destinataire:', recipientSocketId);
-        
-        if (recipientSocketId) {
-            io.to(recipientSocketId).emit('receive_message', data);
-            console.log('✅ Message envoyé via WebSocket');
-        }
-    });
- 
-    socket.on('disconnect', () => {
-        for (const [username, socketId] of connectedUsers.entries()) {
-            if (socketId === socket.id) {
-                connectedUsers.delete(username);
-                console.log(`❌ Utilisateur déconnecté: ${username}`);
-                
-                break;
-            }
-        }
-    });
-
-    // socket.on('search_user', (username) => {
-    //     for (const [storedUsername, socketId] of connectedUsers.entries()) {
-    //         if (storedUsername === username) {
-    //             io.to(socket.id).emit('user_found', { username: storedUsername });
-    //             return;
-    //         }
-    //     }
-    // });
-});
+// Log au démarrage du serveur
+console.log('🚀 Serveur Socket.io démarré');
+console.log('📍 Port: 3000');
+console.log('🌐 CORS configuré');
+console.log('🔄 En attente de connexions...\n');
 
 server.listen(3000, () => {
     console.log('Server is running on port 3000');

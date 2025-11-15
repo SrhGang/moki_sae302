@@ -11,8 +11,8 @@ export const useApiCall = () => {
   ): Promise<T> => {
     const { withAuth = true, withTimeout = false, ...fetchOptions } = options;
     
-    console.log('API Call to:', endpoint);
-    console.log('Options:', options);
+    // console.log('API Call to:', endpoint);
+    // console.log('Options:', options);
     
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     
@@ -24,7 +24,7 @@ export const useApiCall = () => {
     if (withAuth && keys?.accessToken) {
       headers.Authorization = `Bearer ${keys.accessToken}`;
     } else {
-      console.log('⚠️ No access token available for authenticated request');
+      // console.log('⚠️ No access token available for authenticated request');
       if (withAuth) {
         throw new Error('No access token available for authenticated request');
       }
@@ -38,7 +38,7 @@ export const useApiCall = () => {
       config.signal = controller.signal;
     }
 
-    console.log('Request config:', config);
+    // console.log('Request config:', config);
 
     const response = await fetch(`http://localhost:3000${endpoint}`, config);
     
@@ -49,7 +49,7 @@ export const useApiCall = () => {
     }
 
     const data = await response.json();
-    console.log('API Response:', data);
+    // console.log('API Response:', data);
     return data;
   }, [ keys]);
 

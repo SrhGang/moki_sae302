@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSocket } from './useSocket';
 
 import { useAuthContext } from "contexts/AuthContext";
 import { useApiCall } from "hooks/useApiCall";
@@ -11,14 +12,13 @@ const useAuth = () => {
   const navigate = useNavigate();
   const {apiCall} = useApiCall();
   const { setKeys, setUser, clearAuth } = useAuthContext();
+  const { sendMessage } = useSocket();
 
   useEffect(() => {
     // Vérifie l'authentification au chargement
     const checkAuth = async () => {
       try {
         const test = await protect();
-        console.log('test : ', test);
-        
       } catch (error) {
         // logout();
       }
@@ -77,18 +77,23 @@ const useAuth = () => {
   };
 
   const protect = async () => {
-    const getUser: User = await apiCall('/api/protect/', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-    });
+    try {
+      const getUser: User = await apiCall('/api/protect/', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
 
-    setUser(getUser);
-    console.log('/api/protect/ :', getUser);
-    
+      sendMessage('protect', getUser.username);
 
-    return getUser;
+      setUser(getUser);
+      console.log('/api/protect/ :', getUser);
+
+      return getUser;
+    } catch (e) {
+      logout();
+    }
   }
 
   const logout = () => {
