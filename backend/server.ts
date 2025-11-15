@@ -51,8 +51,11 @@ io.on('connection', (socket) => {
 
     socket.on('send_message', (data) => {
         const recipientSocketId = connectedUsers.get(data.recipient);
+        console.log('🎯 Socket ID du destinataire:', recipientSocketId);
+        
         if (recipientSocketId) {
             io.to(recipientSocketId).emit('receive_message', data);
+            console.log('✅ Message envoyé via WebSocket');
         }
     });
  
@@ -60,6 +63,8 @@ io.on('connection', (socket) => {
         for (const [username, socketId] of connectedUsers.entries()) {
             if (socketId === socket.id) {
                 connectedUsers.delete(username);
+                console.log(`❌ Utilisateur déconnecté: ${username}`);
+                
                 break;
             }
         }

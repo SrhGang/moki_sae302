@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from "contexts/AuthContext";
 import { useApiCall } from "hooks/useApiCall";
-import { AccessKey, LoginResult, User } from 'types';
+import { AccessKey, LoginResult, User } from '../types/index';
 
 const useAuth = () => {
   const[message, setMessage] = useState<string>();
@@ -62,7 +62,8 @@ const useAuth = () => {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({username, password})
+        body: JSON.stringify({username, password}),
+        withAuth: false
       });
       console.log( response);
       const newKeys: AccessKey = response.token;
@@ -81,7 +82,6 @@ const useAuth = () => {
       headers: {
         "Content-Type": "application/json"
       },
-      withAuth: true
     });
 
     setUser(getUser);

@@ -78,7 +78,7 @@ export const login = async (req: Request, res: Response) => {
         const accessToken = jwt.sign(
             { uid: user.uid, username: user.username },
             secretKey,
-            { expiresIn: '30m' }
+            { expiresIn: '2h' }
         );
         const refreshToken = jwt.sign(
             { uid: user.uid, username: user.username },
@@ -141,11 +141,11 @@ export const protect = async (req: Request, res: Response, next: Function) => {
         };
         
         next();
-    } catch (e) {
+    } catch (e: any) {
         res.status(401).json({ error: 'Invalid token', code: "INVALID_TOKEN" });
         return;
     }
-}
+};
 
 export const getUserInfo = async (req: Request, res: Response) => {
     try {
@@ -206,7 +206,7 @@ export const searchUsers = async (req: Request, res: Response) => {
         });
 
     } catch (error) {
-        console.error('Erreur lors de la recherche:', error);
+        
         res.status(500).json({ 
             error: 'Erreur lors de la recherche',
             code: "SEARCH_ERROR"

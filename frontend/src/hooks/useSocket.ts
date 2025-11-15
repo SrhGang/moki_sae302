@@ -33,9 +33,49 @@ export const useSocket = () => {
 
   // Fonction pour envoyer des messages
   const sendMessage = (event: string, data: any) => {
+    console.log('📤 Début de sendMessage (frontend)');
+    console.log('🎯 Événement:', event);
+    console.log('📦 Données à envoyer:', data);
+    console.log('🔌 Socket actuel:', socketRef.current ? 'CONNECTÉ' : 'NON CONNECTÉ');
+    
     if (socketRef.current) {
-      socketRef.current.emit(event, data);
+        console.log('🚀 Émission du message via socket...');
+        console.log('📡 Statut du socket:');
+        console.log('  - Connecté:', socketRef.current.connected);
+        console.log('  - ID:', socketRef.current.id);
+        // console.log('  - État:', socketRef.current.active ? 'ACTIF' : 'INACTIF');
+        
+        try {
+            socketRef.current.emit(event, data);
+            console.log('✅ Message émis avec succès');
+            console.log('📊 Détails de l\'émission:');
+            console.log('  - Event:', event);
+            console.log('  - Data size:', JSON.stringify(data).length, 'bytes');
+            console.log('  - Timestamp:', new Date().toISOString());
+            
+        } catch (error: any) {
+            console.log('❌ Erreur lors de l\'émission du message:');
+            console.log('  - Type:', error.name);
+            console.log('  - Message:', error.message);
+            console.log('  - Stack:', error.stack);
+        }
+    } else {
+        console.log('❌ Impossible d\'envoyer le message: socket non connecté');
+        console.log('🔍 Raisons possibles:');
+        console.log('  - Socket non initialisé');
+        console.log('  - Connexion perdue');
+        console.log('  - Composant démonté');
+        console.log('  - Token d\'authentification manquant');
+        
+        // Vérifier le token
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('🔑 Token disponible:', token ? 'OUI' : 'NON');
+        if (token) {
+            console.log('🔑 Token (premiers caractères):', token.substring(0, 20) + '...');
+        }
     }
+    
+    console.log('🏁 Fin de sendMessage (frontend)');
   };
 
   // Fonction pour écouter les événements

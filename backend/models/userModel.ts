@@ -8,6 +8,7 @@ interface IUser {
     profilePicture: string;
     refreshToken?: string;
     createdAt: Date;
+    lastActive: Date;
 }
 
 const generateUID = (): string => {
@@ -20,7 +21,8 @@ const userSchema = new mongoose.Schema<IUser>({
     password: { type: String, required: true },
     profilePicture: { type: String, default: '' },
     refreshToken: { type: String, default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    lastActive: { type: Date, default: Date.now }
 });
 
 userSchema.pre('save', function (next: any) {
