@@ -21,40 +21,15 @@ interface Conversation {
 }
 
 const Dashboard: React.FC = () => {
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: 1,
-      name: "Ruben Merrick",
-      status: "Hors ligne",
-      messages: [],
-      profile: "peeps-avatar-alpha-7.png",
-    },
-    {
-      id: 2,
-      name: "Adeline Griffis",
-      status: "Hors ligne",
-      messages: [],
-      profile: "peeps-avatar-alpha-2.png",
-    },
-    {
-      id: 3,
-      name: "Lyda Townsend",
-      status: "En ligne",
-      messages: [
-        { id: 1, sender: "other" as const, text: "Salut !" },
-        { id: 2, sender: "me" as const, text: "Coucou 😊" },
-      ],
-      profile: "peeps-avatar-alpha-3.png",
-    },
-  ]);
-
-  const [displayModal, setDisplayModal] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
-  const [btnActive, setBtnActive ] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [displayModal, setDisplayModal] = useState(false);
+  const [btnActive, setBtnActive ] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
   const { keys, user } = useAuthContext();
   const navigate = useNavigate();
   const { protect, logout } = useAuth();
-
-  const { socket, sendMessage, subscribeToEvent, unsubscribeFromEvent } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
+  const { socket, sendMessage, searchUser, userSearch, isAuthenticated } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
 
   useEffect(()=> {
     if(!keys.accessToken || !keys.refreshToken) {
@@ -64,68 +39,20 @@ const Dashboard: React.FC = () => {
     protect();
   }, []);
 
-
-
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[2]);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSend = () => {
     if (!newMessage.trim() || !selectedConv) return;
 
-    // const updated: Conversation[] = conversations.map((conv) =>
-    //   conv.id === selectedConv.id ? {
-    //         ...conv,
-    //         messages: [
-    //           ...conv.messages,
-    //           { id: Date.now(), sender: "me" as const, text: newMessage },
-    //         ],
-    //       }
-    //     : conv
-    // );
-
-    // setConversations(updated);
-    // setSelectedConv(updated.find((c) => c.id === selectedConv.id) || null);
-
     // Envoyer le message via Socket.IO
     sendMessage('send_message', {
-      recipient: selectedConv.name, // Utiliser un identifiant unique dans une vraie application
+      recipient: selectedConv.name,
       text: newMessage,
     });
     
     setNewMessage("");
   };
-
-  // +==================== CE VEUX TU AVAIS FAIT ====================+ //
-  
-  // const userAction = document.querySelector('.user-action') ;
-  // const modal = document.querySelector('.modal-user');
-  // const conversationContent = document.querySelector('.chat_content');
-
-  // userAction?.addEventListener('click', function() {
-  //   if (modal?.classList.contains('active')) {
-  //     // Fermer le modal
-  //     // modal.classList.remove('active');
-  //     // conversationContent?.classList.remove('scaled');
-  //   } else {
-  //     console.log("modale-activer");
-          
-  //     // Ouvrir le modal
-  //     modal?.classList.add('active');
-  //     conversationContent?.classList.add('scaled');
-  //   }
-  // });
-
-  // Fermer le modal en cliquant sur le fond
-  // modal?.addEventListener('click', function(e) {
-  //   if (e.target === modal) {
-  //     modal.classList.remove('active');
-  //     conversationContent?.classList.remove('scaled');
-  //   }
-  // });
-
-  // +==================== FIN ====================+ //
-
-
 
   // +==================== CE VEUX J'AI FAIT ====================+ //
 
@@ -134,6 +61,15 @@ const Dashboard: React.FC = () => {
   }, [newMessage]);
 
   // +==================== FIN ====================+ //
+
+  useEffect(()=> {
+    console.log( userSearch.users.length !== 0);
+
+    if(userSearch.users && userSearch.users.length !== 0) {
+      console.log("userSearch : ", userSearch);
+    }
+    
+  }, [userSearch])
 
   if (!user?.profileImage) {
     return (
@@ -156,11 +92,39 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="sidebar__search">
-          <input className="input_search" type="text" placeholder="Recherche..." />
+          <input className="input_search" type="text" placeholder="Recherche..."
+            value={searchQuery}
+            onChange={(e)=> {
+              setSearchQuery(e.target.value);
+              searchUser(e.target.value);
+            }}
+          />
           <i className="icon icon-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
           </i>
         </div>
+
+        { userSearch.users && userSearch.users.length !== 0 &&
+
+          <div style={{flex:1, overflowY:"auto"}}>
+            <div className="search__list">
+            {userSearch.users.map((conv) => (
+                <div
+                key={conv.socketId}
+                className={`conversation`}
+                // onClick={() => setSelectedConv(conv)}
+                >
+                {/* <div className="conversation__avatar"><img src={`./assets/img/${conv.profile}`} /></div> */}
+                <div className="conversation__info">
+                    <span className="conversation__name">{conv.username}</span>
+                    {/* <span className="conversation__status">{conv.status}</span> */}
+                </div>
+                </div>
+            ))}
+            </div>
+        </div>
+
+        }
 
         <div style={{flex:1, overflowY:"auto"}}>
             <div className="sidebar__list">

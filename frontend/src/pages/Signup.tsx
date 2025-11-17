@@ -13,7 +13,7 @@ const Signup = () => {
 const handleSignup = () => {
         console.log('Username : ', username);
         console.log('Password : ', password);
-        signup(username, password)
+        signup(username, password);
     }
 
   return (

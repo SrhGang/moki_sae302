@@ -14,17 +14,17 @@ const useAuth = () => {
   const { setKeys, setUser, clearAuth } = useAuthContext();
   const { sendMessage } = useSocket();
 
-  useEffect(() => {
-    // Vérifie l'authentification au chargement
-    const checkAuth = async () => {
-      try {
-        const test = await protect();
-      } catch (error) {
-        // logout();
-      }
-    };
-    checkAuth();
-  }, []);
+  // useEffect(() => {
+  //   // Vérifie l'authentification au chargement
+  //   const checkAuth = async () => {
+  //     try {
+  //       const test = await protect();
+  //     } catch (error) {
+  //       // logout();
+  //     }
+  //   };
+  //   checkAuth();
+  // }, []);
 
 
 
@@ -35,16 +35,22 @@ const useAuth = () => {
     }
   
     try {
-      const response = await apiCall("/api/signup", {
+      const response: any = await apiCall("/api/signup", {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({username, password})
+        body: JSON.stringify({username, password}),
+        withAuth: false
       });
-        
+
+      console.log("[Signup] Response :", response);
+      if(response.code === "USER_CREATED") {
+        navigate("/login")
+      }
+
     } catch (e) {
-        
+      console.error(e)
     }
     return { login, logout, message };
   }
