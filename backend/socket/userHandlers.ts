@@ -1,21 +1,15 @@
 import { Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { connectedUsers, getUsernameBySocketId } from "../utilis/connectedUsers";
+import { connectedUsers, getUsernameBySocketId, getSocketIdByUsername } from "../utilis/connectedUsers";
 
+interface IUserPayload {
+    username: string;
+    socketId: string;
+}
 
 export const userHandlers = (socket: Socket, io: any) => {
     socket.on('disconnect', (reason) => {
         console.log('\n🔌 DÉCONNEXION SOCKET');
-        const userFound = getUsernameBySocketId(socket.id);
-
-        console.log('   📍 Utilisateur déconnecté :', userFound);
-        console.log('   🗑️  Supprimé de la map des connexions');
-
-        if (!userFound) {
-            console.log('ℹ️  Socket non authentifié ou déjà supprimé');
-        }
-
-        console.log('   📊 Total connectés après déco:', connectedUsers.size);
         console.log('   👥 Liste restante:', Array.from(connectedUsers.entries()));
     });
 
@@ -67,12 +61,23 @@ export const userHandlers = (socket: Socket, io: any) => {
         }
     });
 
-    socket.on('search_user', (username) => {
-        for (const [storedUsername, socketId] of connectedUsers.entries()) {
-            if (storedUsername === username) {
-                io.to(socket.id).emit('user_found', { username: storedUsername });
-                return;
-            }
+    socket.on('search_user', (payload: IUserPayload) => {
+        console.log("[userHandlers] Utilisateur demander :", payload);
+        const username = payload.username;
+
+        if (!username) {
+            console.log('   ❌ Paramètre invalide pour search_user');
+            io.to(socket.id).emit('user_not_found', { username: null });
+            return;
+        }
+
+        const storedSocketId = getSocketIdByUsername(username);
+        console.log("getSocketIdByUsername : ", storedSocketId);
+
+        if (storedSocketId) {
+            io.to(socket.id).emit('user_found', { username, socketId: storedSocketId });
+        } else {
+            io.to(socket.id).emit('user_not_found', { username });
         }
     });
 }

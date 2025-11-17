@@ -45,9 +45,6 @@ io.on('connection', (socket) => { socketHandlers(socket, io); });
 
 // Log au démarrage du serveur
 console.log('🚀 Serveur Socket.io démarré');
-console.log('📍 Port: 3000');
-console.log('🌐 CORS configuré');
-console.log('🔄 En attente de connexions...\n');
 
 server.listen(3000, () => {
     console.log('Server is running on port 3000');
