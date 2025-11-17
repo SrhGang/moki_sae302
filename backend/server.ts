@@ -39,7 +39,7 @@ app.use('/api/avatar', avatarRoute);
 app.use('/api/refresh', tokenRoute);
 app.use('/api/logout', logoutRoute);
 app.use('/api/protect', userRoute);
-app.use('/api/messages', messageRoute);
+// app.use('/api/messages', messageRoute); // Migré vers WebSocket
 
 io.on('connection', (socket) => { socketHandlers(socket, io); });
 
