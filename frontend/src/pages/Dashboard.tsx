@@ -4,119 +4,154 @@ import { useAuthContext } from "contexts/AuthContext";
 import useAuth from "../hooks/useAuth" 
 import { useNavigate } from "react-router-dom";
 import Avatars from "../components/Avatars";
+import { useSocket } from "../hooks/useSocket";
 
 interface Message {
   id: number;
   sender: "me" | "other";
   text: string;
+  timestamp?: string;
 }
 
 interface Conversation {
   id: number;
   name: string;
   status: string;
+  profile: string;
   messages: Message[];
 }
 
 const Dashboard: React.FC = () => {
+  const [searchUser, setSearchUser] = useState("");
+  const [allUsers, setAllUsers] = useState<Conversation[]>([]); // Tous les utilisateurs du backend
+  const [isLoading, setIsLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: 1,
       name: "Ruben Merrick",
-      status: "Nouveau message",
+      status: "Hors ligne",
       messages: [],
+      profile: "peeps-avatar-alpha-7.png",
     },
     {
       id: 2,
       name: "Adeline Griffis",
-      status: "Nouveau message",
+      status: "Hors ligne",
       messages: [],
+      profile: "peeps-avatar-alpha-2.png",
     },
     {
       id: 3,
       name: "Lyda Townsend",
-      status: "Vu",
+      status: "En ligne",
       messages: [
         { id: 1, sender: "other" as const, text: "Salut !" },
         { id: 2, sender: "me" as const, text: "Coucou 😊" },
       ],
+      profile: "peeps-avatar-alpha-3.png",
     },
   ]);
+const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[2]);
+  const [displayModal, setDisplayModal] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
+  const [btnActive, setBtnActive ] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
   const { keys, user } = useAuthContext();
   const navigate = useNavigate();
-  const { protect } = useAuth();
-
-   useEffect(()=> {
-    if(!keys.accessToken || !keys.refreshToken) {
-      // navigate('/login');
-    }
-    
-    protect();
-
-    // if (!user?.profileImage) {
-    //   navigate('/avatar')
-    // }
-
-  }, []);
-
-
-
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(
-    conversations[2]
-  );
+  const { protect, logout } = useAuth();
   const [newMessage, setNewMessage] = useState("");
 
-  const handleSend = () => {
-    if (!newMessage.trim() || !selectedConv) return;
+  const { socket, sendMessage, subscribeToEvent, unsubscribeFromEvent } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
 
-    const updated: Conversation[] = conversations.map((conv) =>
-      conv.id === selectedConv.id
-        ? {
-            ...conv,
-            messages: [
-              ...conv.messages,
-              { id: Date.now(), sender: "me" as const, text: newMessage },
-            ],
-          }
+ const handleSend = () => {
+    if (!newMessage.trim() || !selectedConv || !socket) return;
+
+    const messageData = {
+      recipientId: selectedConv.id,
+      recipientName: selectedConv.name,
+      text: newMessage,
+      timestamp: new Date().toISOString()
+    };
+
+    // Créer le message pour l'affichage local (optimistic update)
+    const messageToSend: Message = {
+      id: Date.now(), // ID temporaire
+      sender: 'me',
+      text: newMessage,
+      timestamp: messageData.timestamp
+    };
+
+    // Mettre à jour l'interface immédiatement
+    const updated = conversations.map((conv) =>
+      conv.id === selectedConv.id 
+        ? { ...conv, messages: [...conv.messages, messageToSend] }
         : conv
     );
 
     setConversations(updated);
     setSelectedConv(updated.find((c) => c.id === selectedConv.id) || null);
+
+    // Envoyer au backend via socket
+    socket.emit('send_message', messageData);
+    
     setNewMessage("");
   };
 
-  const userAction = document.querySelector('.user-action') ;
-  const modal = document.querySelector('.modal-user');
-  const conversationContent = document.querySelector('.chat_content');
-
-  userAction?.addEventListener('click', function() {
-    if (modal?.classList.contains('active')) {
-      // Fermer le modal
-      // modal.classList.remove('active');
-      // conversationContent?.classList.remove('scaled');
-    } else {
-      console.log("modale-activer");
-          
-      // Ouvrir le modal
-      modal?.classList.add('active');
-      conversationContent?.classList.add('scaled');
+  useEffect(()=> {
+    if(!keys.accessToken || !keys.refreshToken) {
+      // navigate('/login');
     }
-  });
+    
+    protect();
+  }, []);
 
-  // Fermer le modal en cliquant sur le fond
-  modal?.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      modal.classList.remove('active');
-      conversationContent?.classList.remove('scaled');
-    }
-  });
+
 
   if (!user?.profileImage) {
     return (
       <Avatars />
     );
   }
+
+  // ================ fonction recherche ===========
+
+  // export default function Dashboard() {
+  const [searchQuery, setSearchQuery] = useState('');       //Stock la valeur de recherche
+  // const [selectedUser, setSelectedUser] = useState<Conversation | null>(null);
+
+  // const filteredUsers = conversations.filter(user =>        //Filtre les utilisateur en temps réel
+  //   user.name.toLowerCase().includes(searchQuery.toLowerCase())   //Rend la recherche insensible a la case
+  // );                                                              //et vérifie si le nom contient la chaine recherché
+
+  // const handleUserClick = (user: Conversation) => {
+  //   setSelectedUser(user);
+  // };
+  
+  useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost:3001/api/users'); // Votre endpoint
+      const data = await response.json();
+      
+      // Transformer les données en format Conversation
+      const conversationsFromBackend: Conversation[] = data.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        status: user.status || 'Hors ligne',
+        profile: user.avatar || 'default-avatar.png',
+        messages: []
+      }));
+      
+      setConversations(conversationsFromBackend);
+      setAllUsers(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchUsers();
+}, []);
 
   return (
     <div className="dashboard">
@@ -126,22 +161,33 @@ const Dashboard: React.FC = () => {
         <div className="sidebar_message">
           
           <i className="icon icon_message">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="32" height="32" fill="none"/><path d="M45.15,230.11A8,8,0,0,1,32,224V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V192a8,8,0,0,1-8,8H80Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="32" height="32" fill="none"/><path d="M45.15,230.11A8,8,0,0,1,32,224V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8V192a8,8,0,0,1-8,8H80Z" fill="none" stroke="currentColor"  strokeWidth="16"/></svg>
           </i>
           <h3>Message</h3> 
           
         </div>
 
+          {/* ========Recherche========= */}
         <div className="sidebar__search">
-          <input className="input_search" type="text" placeholder="Recherche..." />
+          <input className="input_search" type="text" placeholder="Recherche..." 
+          
+          // value={searchQuery}
+         value={searchUser}
+         onChange={(e) => setSearchQuery(e.target.value)} />  
           <i className="icon icon-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
           </i>
         </div>
 
+
+
         <div style={{flex:1, overflowY:"auto"}}>
             <div className="sidebar__list">
-            {conversations.map((conv) => (
+               {isLoading ? (
+                <div className="loading">Chargement...</div>
+              ) : (
+            <>
+           {/* /* {conversations.map((conv) => (
                 <div
                 key={conv.id}
                 className={`conversation ${
@@ -149,42 +195,85 @@ const Dashboard: React.FC = () => {
                 }`}
                 onClick={() => setSelectedConv(conv)}
                 >
-                <div className="conversation__avatar"></div>
+                <div className="conversation__avatar"><img src={`./assets/img/${conv.profile}`} /></div>
                 <div className="conversation__info">
                     <span className="conversation__name">{conv.name}</span>
                     <span className="conversation__status">{conv.status}</span>
                 </div>
                 </div>
-            ))}
+            ))} */ }
+             {conversations
+              .filter(conv => 
+                conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`conversation ${
+                    selectedConv?.id === conv.id ? "conversation--active" : ""
+                  }`}
+                  onClick={() => setSelectedConv(conv)}
+                >
+                  <div className="conversation__avatar">
+                    <img src={`./assets/img/${conv.profile}`} />
+                  </div>
+                  <div className="conversation__info">
+                    <span className="conversation__name">{conv.name}</span>
+                    <span className="conversation__status">{conv.status}</span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Message optionnel si aucun résultat */}
+                {conversations.filter(conv => 
+                  conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 && (
+                  <p style={{textAlign: 'center', padding: '39px', color: '#999'}}>
+                    Aucun utilisateur trouvé
+                  </p>
+                )}
+                </>
+              )}
             </div>
         </div>
 
+        {/* ============Fin Recherche=========== */}
+
         <div className="sidebar__profile">
-          <div className="sidebar__profile-avatar"><img src={`${user.profileImage}`} alt="" /></div>
+          <div className="sidebar__profile-avatar">
+            <img src={user?.profileImage} alt=""/>
+          </div>
           <div className="sidebar__profile-info">
             <span className="sidebar__profile-name">Moi</span>
             <span className="sidebar__profile-status">En ligne</span>
           </div>
-            <div className="user-action">
+            <button className="user-action" onClick={() =>  setDisplayModal(!displayModal)}>
+
               <i className="icon icon-menu">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256">
                 <path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM128,72a12,12,0,1,0-12-12A12,12,0,0,0,128,72Zm0,112a12,12,0,1,0,12,12A12,12,0,0,0,128,184Z"></path></svg>
               </i>
-          </div>
+
+          </button>
 
         </div>
       </div>
 
       {/* Chat area */}
       <div className="chat">
-        <div className="modal-user">
-          <div className="modal-user-content">
+        <div className={`modal-user  ${displayModal ? "active" : "" }`} onClick={(e: React.MouseEvent) => {
+            if (e.target === e.currentTarget) {
+              setDisplayModal(false);
+            }
+          }}>
+          <div className="modal-user-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>{ /**==================== J'AI AJOUTE ====================**/ }
+            
             <div className="modal-card">
               <section className="modal-card-titre semi-bold"> {user?.username} </section>
 
               <section className="modal-btns">
                 <span>Marquer hors ligne</span>
-                <span>Se déconnecter</span>
+                <span><button type="button" onClick={logout}>Se déconnecter </button> </span>
               </section>
             </div>
 
@@ -201,15 +290,30 @@ const Dashboard: React.FC = () => {
 
         {selectedConv ? (
           <>
-          <div className="chat_content">
+          <div className={`chat_content ${displayModal ? "scaled" : ""}`}>
             <div className="chat__header">
-              <div className="chat__header-avatar">
-                <img src="http://localhost:3000/static/media/peeps-avatar-alpha-2.6a6c9d37640551233228.png" alt="" />
+
+              <div className="chat__header-info">
+                <div className="chat__header-avatar">
+                  <img src={`./assets/img/${selectedConv.profile}`} alt="" />
+                </div>
+
+                <div className="chat__header-conv">
+                  <p className="chat__header-name">{selectedConv.name}</p>
+                  <p className="chat__header-status">{selectedConv.status}</p>
+                </div>
               </div>
-              <div>
-                <p className="chat__header-name">{selectedConv.name}</p>
-                <p className="chat__header-status">{selectedConv.status}</p>
+
+              <div className="chat__header-action">
+                <div className="action__call">
+                  <i className="icon icon-phone">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46ZM176,208A128.14,128.14,0,0,1,48,80,40.2,40.2,0,0,1,82.87,40a.61.61,0,0,0,0,.12l21,47L83.2,111.86a6.13,6.13,0,0,0-.57.77,16,16,0,0,0-1,15.7c9.06,18.53,27.73,37.06,46.46,46.11a16,16,0,0,0,15.75-1.14,8.44,8.44,0,0,0,.74-.56L168.89,152l47,21.05h0s.08,0,.11,0A40.21,40.21,0,0,1,176,208Z"></path></svg>
+                  </i>
+
+                  <span>Appel</span>
+                </div>
               </div>
+
             </div>
 
             <div className="chat__messages">
@@ -218,22 +322,31 @@ const Dashboard: React.FC = () => {
                   key={msg.id}
                   className={`message message--${msg.sender}`}
                 >
-                  {msg.text}
+                  {/* {msg.text}
                 </div>
               ))}
-            </div>
+            </div> */}
+            <div className="message__content">
+                  <p className="message__text">{msg.text}</p>
+                  {msg.timestamp && (
+                    <span className="message__time">
+                      {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
 
             <div className="chat__input">
-              <input
-                type="text"
-                placeholder="Messages"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              />
-              <button onClick={handleSend} className="btn-send">
+              <input type="text" placeholder="Messages" value={newMessage} onChange={(e) => { setNewMessage(e.target.value);[/* setBtnActive(true);*/] }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); handleSend();}}}/>
+              
+              <button onClick={handleSend} className={`btn-send ${btnActive ? 'btn-send--active' : '' }`} disabled={!btnActive}>
                 <i className="icon icon-arrow-top">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
                 </i>
                </button> 
             </div>
@@ -245,6 +358,8 @@ const Dashboard: React.FC = () => {
       </div>
     </div>
   );
+
 };
+
 
 export default Dashboard;

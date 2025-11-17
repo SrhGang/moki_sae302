@@ -17,15 +17,15 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-      <Routes>
-        <Route path="*" element={<NotFound />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/avatar" element={<Avatar />} />
-      </Routes>
-    </Router>
+        <Routes>
+          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/avatar" element={<Avatar />} />
+        </Routes>
+      </Router>
     </AuthProvider>
     
   );

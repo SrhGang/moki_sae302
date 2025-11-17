@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSocket } from './useSocket';
 
 import { useAuthContext } from "contexts/AuthContext";
 import { useApiCall } from "hooks/useApiCall";
-import { AccessKey, LoginResult, User } from 'types';
+import { AccessKey, LoginResult, User } from '../types/index';
 
 const useAuth = () => {
   const[message, setMessage] = useState<string>();
 
   const navigate = useNavigate();
   const {apiCall} = useApiCall();
-  const { setKeys, setUser } = useAuthContext();
+  const { setKeys, setUser, clearAuth } = useAuthContext();
+  const { sendMessage } = useSocket();
 
-  useEffect(() => {
-  }, []);
+  // useEffect(() => {
+  //   // Vérifie l'authentification au chargement
+  //   const checkAuth = async () => {
+  //     try {
+  //       const test = await protect();
+  //     } catch (error) {
+  //       logout();
+  //     }
+  //   };
+  //   checkAuth();
+  // }, []);
 
 
 
@@ -24,14 +35,21 @@ const useAuth = () => {
     }
   
     try {
-      const response = await apiCall("/api/signup", {
+      const response: any = await apiCall("/api/signup", {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({username, password})
+        body: JSON.stringify({username, password}),
+        withAuth: false
       });
         
+      console.log("Signup");
+      
+      if (response.code === "USER_CREATED") {
+        navigate("/login")
+      }
+
     } catch (e) {
         
     }
@@ -51,7 +69,8 @@ const useAuth = () => {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({username, password})
+        body: JSON.stringify({username, password}),
+        withAuth: false
       });
       console.log( response);
       const newKeys: AccessKey = response.token;
@@ -64,7 +83,7 @@ const useAuth = () => {
     }
   };
 
- const protect = async () => {
+  const protect = async () => {
     try {
       const getUser: User = await apiCall('/api/protect/', {
         method: "POST",
@@ -73,16 +92,20 @@ const useAuth = () => {
         },
       });
 
-setUser(getUser);
+      sendMessage('protect', getUser.username);
+
+      setUser(getUser);
       console.log('/api/protect/ :', getUser);
 
-return getUser;
+      return getUser;
     } catch (e) {
       logout();
     }
   }
 
   const logout = () => {
+    clearAuth(); // Nettoie les données d'authentification
+    localStorage.clear(); // Nettoie le localStorage
     navigate('/login');
   };
 
