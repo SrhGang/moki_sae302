@@ -40,7 +40,7 @@ export const useApiCall = () => {
 
     // console.log('Request config:', config);
 
-    const response = await fetch(`http://localhost:3000${endpoint}`, config);
+    const response = await fetch(`http://10.16.48.189:3000${endpoint}`, config);
     
     if (!response.ok) {
       const errorData = await response.json();

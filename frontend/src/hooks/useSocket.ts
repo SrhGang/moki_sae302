@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuthContext } from 'contexts/AuthContext';
 
-const SOCKET_SERVER_URL = 'http://localhost:3000';
+const SOCKET_SERVER_URL = 'http://10.16.48.189:3000';
 
 interface UserSearch {
   username: string; 
@@ -12,10 +12,15 @@ interface UserSearch {
 
 export const useSocket = () => {
   const socketRef = useRef<typeof Socket | null>(null);
+<<<<<<< HEAD
+   const [listUser, setListUser] = useState();
+  const [message, setMessage] = useState([]);
+=======
   const [message, setMessage] = useState([]);
   const [userSearch, setUserSearch] = useState<{ users: UserSearch[] }>({ users: [] });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { keys } = useAuthContext();
+>>>>>>> 81d20a0efc876092e15bfd272950bebef09beeba
 
   useEffect(() => {
     // Initialiser la connexion Socket.IO
@@ -115,6 +120,26 @@ export const useSocket = () => {
     }
   };
 
+
+  interface UserSearch {
+    username: string;
+    socketid: string | null;
+    profilePicture: string;
+  }
+
+  const [ userSearch, setUserSearch ] = useState<{ users: UserSearch[] }>({ users: []});
+  const searchUser = (username: string) => {
+
+    sendMessage('search_user', { username })
+
+    subscribeToEvent("user_found", (data: { users: UserSearch[]})=> {
+      console.log(data);
+      
+      setUserSearch(data);
+    } )
+  }
+
+
   // Fonction pour arrêter d'écouter les événements
   const unsubscribeFromEvent = (event: string, callback: (data: any) => void) => {
     if (socketRef.current) {
@@ -128,11 +153,17 @@ export const useSocket = () => {
     searchUser,
     subscribeToEvent,
     unsubscribeFromEvent,
+<<<<<<< HEAD
+    searchUser,
+    userSearch
+=======
     message,
     userSearch,
     isAuthenticated
+>>>>>>> 81d20a0efc876092e15bfd272950bebef09beeba
   };
 };
+ 
 
 // // ==========================Message========================
 // interface Message {
