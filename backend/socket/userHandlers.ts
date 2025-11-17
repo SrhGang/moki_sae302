@@ -9,7 +9,7 @@ interface IUserPayload {
 }
 
 interface IUserSearch {
-    users: Array<{ username: string; socketId: string | null }>;
+    users: Array<{ username: string; profilePicture: string; socketId: string | null }>;
 }
 
 export const userHandlers = (socket: Socket, io: any) => {
@@ -82,9 +82,9 @@ export const userHandlers = (socket: Socket, io: any) => {
         userFound.then((users) => {
             users.forEach((user) => {
                 const socketId = getSocketIdByUsername(user.username);
-                listUser.users.push({ username: user.username, socketId: socketId || null });
+                listUser.users.push({ username: user.username, profilePicture: user.profilePicture,  socketId: socketId || null });
             });
-            io.to(socket.id).emit('user_found', { users: listUser });
+            io.to(socket.id).emit('user_found', { users: listUser.users });
         }).catch((err) => {
             console.log('   ❌ Erreur lors de la recherche des utilisateurs:', err);
             io.to(socket.id).emit('user_search_result', { users: [] });

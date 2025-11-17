@@ -13,7 +13,7 @@ const NavBar = ()=>{
                     
                     <div className="nav-menu">
                         <Link to="/avatar" className="btn-menu ">Avatars </Link>
-                        <Link to="/signup" className="btn-menu">S'inscrire </Link>
+                        <Link to="/Signup" className="btn-menu">S'inscrire </Link>
                         <Link to="/login" className="btn-menu menu-active">Se connecter </Link>
                         {/* <Link to="/dashboard" className="btn-menu ">Tableau de bord </Link> */}
                         

@@ -20,7 +20,7 @@ const useAuth = () => {
   //     try {
   //       const test = await protect();
   //     } catch (error) {
-  //       // logout();
+  //       logout();
   //     }
   //   };
   //   checkAuth();
@@ -43,9 +43,10 @@ const useAuth = () => {
         body: JSON.stringify({username, password}),
         withAuth: false
       });
-
-      console.log("[Signup] Response :", response);
-      if(response.code === "USER_CREATED") {
+        
+      console.log("Signup");
+      
+      if (response.code === "USER_CREATED") {
         navigate("/login")
       }
 

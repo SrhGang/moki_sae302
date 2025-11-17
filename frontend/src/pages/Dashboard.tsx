@@ -10,6 +10,7 @@ interface Message {
   id: number;
   sender: "me" | "other";
   text: string;
+  timestamp?: string;
 }
 
 interface Conversation {
@@ -21,55 +22,88 @@ interface Conversation {
 }
 
 const Dashboard: React.FC = () => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [displayModal, setDisplayModal] = useState(false);
-  const [btnActive, setBtnActive ] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
+  const [searchUser, setSearchUser] = useState("");
+  const [allUsers, setAllUsers] = useState<Conversation[]>([]); // Tous les utilisateurs du backend
+  const [isLoading, setIsLoading] = useState(true);
+  const [conversations, setConversations] = useState<Conversation[]>([
+    {
+      id: 1,
+      name: "Ruben Merrick",
+      status: "Hors ligne",
+      messages: [],
+      profile: "peeps-avatar-alpha-7.png",
+    },
+    {
+      id: 2,
+      name: "Adeline Griffis",
+      status: "Hors ligne",
+      messages: [],
+      profile: "peeps-avatar-alpha-2.png",
+    },
+    {
+      id: 3,
+      name: "Lyda Townsend",
+      status: "En ligne",
+      messages: [
+        { id: 1, sender: "other" as const, text: "Salut !" },
+        { id: 2, sender: "me" as const, text: "Coucou 😊" },
+      ],
+      profile: "peeps-avatar-alpha-3.png",
+    },
+  ]);
+const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[2]);
+  const [displayModal, setDisplayModal] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
+  const [btnActive, setBtnActive ] = useState(false);   // +==================== J'AI AJOUTE ====================+ //
   const { keys, user } = useAuthContext();
   const navigate = useNavigate();
   const { protect, logout } = useAuth();
-  const { socket, sendMessage, searchUser, userSearch, isAuthenticated } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
+  const [newMessage, setNewMessage] = useState("");
+
+  const { socket, sendMessage, subscribeToEvent, unsubscribeFromEvent } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
+
+ const handleSend = () => {
+    if (!newMessage.trim() || !selectedConv || !socket) return;
+
+    const messageData = {
+      recipientId: selectedConv.id,
+      recipientName: selectedConv.name,
+      text: newMessage,
+      timestamp: new Date().toISOString()
+    };
+
+    // Créer le message pour l'affichage local (optimistic update)
+    const messageToSend: Message = {
+      id: Date.now(), // ID temporaire
+      sender: 'me',
+      text: newMessage,
+      timestamp: messageData.timestamp
+    };
+
+    // Mettre à jour l'interface immédiatement
+    const updated = conversations.map((conv) =>
+      conv.id === selectedConv.id 
+        ? { ...conv, messages: [...conv.messages, messageToSend] }
+        : conv
+    );
+
+    setConversations(updated);
+    setSelectedConv(updated.find((c) => c.id === selectedConv.id) || null);
+
+    // Envoyer au backend via socket
+    socket.emit('send_message', messageData);
+    
+    setNewMessage("");
+  };
 
   useEffect(()=> {
     if(!keys.accessToken || !keys.refreshToken) {
-      navigate('/login');
+      // navigate('/login');
     }
     
     protect();
   }, []);
 
-  const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversations[2]);
-  const [newMessage, setNewMessage] = useState("");
 
-  const handleSend = () => {
-    if (!newMessage.trim() || !selectedConv) return;
-
-    // Envoyer le message via Socket.IO
-    sendMessage('send_message', {
-      recipient: selectedConv.name,
-      text: newMessage,
-    });
-    
-    setNewMessage("");
-  };
-
-  // +==================== CE VEUX J'AI FAIT ====================+ //
-
-  useEffect(() => {
-    setBtnActive(newMessage.trim().length > 0);
-  }, [newMessage]);
-
-  // +==================== FIN ====================+ //
-
-  useEffect(()=> {
-    console.log( userSearch.users.length !== 0);
-
-    if(userSearch.users && userSearch.users.length !== 0) {
-      console.log("userSearch : ", userSearch);
-    }
-    
-  }, [userSearch])
 
   if (!user?.profileImage) {
     return (
@@ -77,10 +111,52 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  // ================ fonction recherche ===========
+
+  // export default function Dashboard() {
+  const [searchQuery, setSearchQuery] = useState('');       //Stock la valeur de recherche
+  // const [selectedUser, setSelectedUser] = useState<Conversation | null>(null);
+
+  // const filteredUsers = conversations.filter(user =>        //Filtre les utilisateur en temps réel
+  //   user.name.toLowerCase().includes(searchQuery.toLowerCase())   //Rend la recherche insensible a la case
+  // );                                                              //et vérifie si le nom contient la chaine recherché
+
+  // const handleUserClick = (user: Conversation) => {
+  //   setSelectedUser(user);
+  // };
+  
+  useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost:3001/api/users'); // Votre endpoint
+      const data = await response.json();
+      
+      // Transformer les données en format Conversation
+      const conversationsFromBackend: Conversation[] = data.map((user: any) => ({
+        id: user.id,
+        name: user.name,
+        status: user.status || 'Hors ligne',
+        profile: user.avatar || 'default-avatar.png',
+        messages: []
+      }));
+      
+      setConversations(conversationsFromBackend);
+      setAllUsers(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchUsers();
+}, []);
+
   return (
     <div className="dashboard">
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className="sidebar" style={{background: "var(--Crean)"}}>
 
         <div className="sidebar_message">
           
@@ -91,44 +167,27 @@ const Dashboard: React.FC = () => {
           
         </div>
 
+          {/* ========Recherche========= */}
         <div className="sidebar__search">
-          <input className="input_search" type="text" placeholder="Recherche..."
-            value={searchQuery}
-            onChange={(e)=> {
-              setSearchQuery(e.target.value);
-              searchUser(e.target.value);
-            }}
-          />
+          <input className="input_search" type="text" placeholder="Recherche..." 
+          
+          // value={searchQuery}
+         value={searchUser}
+         onChange={(e) => setSearchQuery(e.target.value)} />  
           <i className="icon icon-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
           </i>
         </div>
 
-        { userSearch.users && userSearch.users.length !== 0 &&
 
-          <div style={{flex:1, overflowY:"auto"}}>
-            <div className="search__list">
-            {userSearch.users.map((conv) => (
-                <div
-                key={conv.socketId}
-                className={`conversation`}
-                // onClick={() => setSelectedConv(conv)}
-                >
-                {/* <div className="conversation__avatar"><img src={`./assets/img/${conv.profile}`} /></div> */}
-                <div className="conversation__info">
-                    <span className="conversation__name">{conv.username}</span>
-                    {/* <span className="conversation__status">{conv.status}</span> */}
-                </div>
-                </div>
-            ))}
-            </div>
-        </div>
-
-        }
 
         <div style={{flex:1, overflowY:"auto"}}>
             <div className="sidebar__list">
-            {conversations.map((conv) => (
+               {isLoading ? (
+                <div className="loading">Chargement...</div>
+              ) : (
+            <>
+           {/* /* {conversations.map((conv) => (
                 <div
                 key={conv.id}
                 className={`conversation ${
@@ -142,9 +201,43 @@ const Dashboard: React.FC = () => {
                     <span className="conversation__status">{conv.status}</span>
                 </div>
                 </div>
-            ))}
+            ))} */ }
+             {conversations
+              .filter(conv => 
+                conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`conversation ${
+                    selectedConv?.id === conv.id ? "conversation--active" : ""
+                  }`}
+                  onClick={() => setSelectedConv(conv)}
+                >
+                  <div className="conversation__avatar">
+                    <img src={`./assets/img/${conv.profile}`} />
+                  </div>
+                  <div className="conversation__info">
+                    <span className="conversation__name">{conv.name}</span>
+                    <span className="conversation__status">{conv.status}</span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Message optionnel si aucun résultat */}
+                {conversations.filter(conv => 
+                  conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 && (
+                  <p style={{textAlign: 'center', padding: '39px', color: '#999'}}>
+                    Aucun utilisateur trouvé
+                  </p>
+                )}
+                </>
+              )}
             </div>
         </div>
+
+        {/* ============Fin Recherche=========== */}
 
         <div className="sidebar__profile">
           <div className="sidebar__profile-avatar">
@@ -229,15 +322,29 @@ const Dashboard: React.FC = () => {
                   key={msg.id}
                   className={`message message--${msg.sender}`}
                 >
-                  {msg.text}
+                  {/* {msg.text}
                 </div>
               ))}
-            </div>
+            </div> */}
+            <div className="message__content">
+                  <p className="message__text">{msg.text}</p>
+                  {msg.timestamp && (
+                    <span className="message__time">
+                      {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
 
             <div className="chat__input">
-              <input type="text" placeholder="Messages" value={newMessage} onChange={(e) => { setNewMessage(e.target.value); setBtnActive(true); }} onKeyDown={(e) => e.key === "Enter" && handleSend()} />
+              <input type="text" placeholder="Messages" value={newMessage} onChange={(e) => { setNewMessage(e.target.value);[/* setBtnActive(true);*/] }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); handleSend();}}}/>
               
-              <button onClick={handleSend} className={`btn-send ${btnActive ? '--active' : '' }`} >
+              <button onClick={handleSend} className={`btn-send ${btnActive ? 'btn-send--active' : '' }`} disabled={!btnActive}>
                 <i className="icon icon-arrow-top">
                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
                 </i>
@@ -251,6 +358,8 @@ const Dashboard: React.FC = () => {
       </div>
     </div>
   );
+
 };
+
 
 export default Dashboard;
