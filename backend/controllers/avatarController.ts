@@ -22,7 +22,8 @@ export const updateAvatar = async (req: Request, res: Response) => {
 
         res.json({ 
             message: 'Profile picture updated successfully',
-            profilePicture: user.profilePicture 
+            profilePicture: user.profilePicture,
+            code: "AVATAR_UPDATED"
         });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });

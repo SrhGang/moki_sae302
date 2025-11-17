@@ -1,10 +1,15 @@
 import { Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { connectedUsers, getUsernameBySocketId, getSocketIdByUsername } from "../utilis/connectedUsers";
+import { User } from '../models/userModel';
 
 interface IUserPayload {
     username: string;
     socketId: string;
+}
+
+interface IUserSearch {
+    users: Array<{ username: string; profilePicture: string; socketId: string | null }>;
 }
 
 export const userHandlers = (socket: Socket, io: any) => {
@@ -63,6 +68,7 @@ export const userHandlers = (socket: Socket, io: any) => {
 
     socket.on('search_user', (payload: IUserPayload) => {
         console.log("[userHandlers] Utilisateur demander :", payload);
+        const listUser: IUserSearch = { users: [] };
         const username = payload.username;
 
         if (!username) {
@@ -70,14 +76,27 @@ export const userHandlers = (socket: Socket, io: any) => {
             io.to(socket.id).emit('user_not_found', { username: null });
             return;
         }
+        
+        // Rechercher l'utilisateur dans la base de données où le nom d'utilisateur contient la chaine donnée
+        const userFound = User.find({ username: { $regex: username, $options: 'i' } }).limit(10);
+        userFound.then((users) => {
+            users.forEach((user) => {
+                const socketId = getSocketIdByUsername(user.username);
+                listUser.users.push({ username: user.username, profilePicture: user.profilePicture,  socketId: socketId || null });
+            });
+            io.to(socket.id).emit('user_found', { users: listUser.users });
+        }).catch((err) => {
+            console.log('   ❌ Erreur lors de la recherche des utilisateurs:', err);
+            io.to(socket.id).emit('user_search_result', { users: [] });
+        });
 
-        const storedSocketId = getSocketIdByUsername(username);
-        console.log("getSocketIdByUsername : ", storedSocketId);
+        // const storedSocketId = getSocketIdByUsername(username);
+        // console.log("getSocketIdByUsername : ", storedSocketId);
 
-        if (storedSocketId) {
-            io.to(socket.id).emit('user_found', { username, socketId: storedSocketId });
-        } else {
-            io.to(socket.id).emit('user_not_found', { username });
-        }
+        // if (storedSocketId) {
+        //     io.to(socket.id).emit('user_found', { username, socketId: storedSocketId });
+        // } else {
+        //     io.to(socket.id).emit('user_not_found', { username });
+        // }
     });
 }

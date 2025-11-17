@@ -1,12 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { useAuthContext } from 'contexts/AuthContext';
 
 const SOCKET_SERVER_URL = 'http://10.16.48.189:3000';
 
+interface UserSearch {
+  username: string; 
+  socketId: string | null;
+}
+
 export const useSocket = () => {
   const socketRef = useRef<typeof Socket | null>(null);
+<<<<<<< HEAD
    const [listUser, setListUser] = useState();
   const [message, setMessage] = useState([]);
+=======
+  const [message, setMessage] = useState([]);
+  const [userSearch, setUserSearch] = useState<{ users: UserSearch[] }>({ users: [] });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { keys } = useAuthContext();
+>>>>>>> 81d20a0efc876092e15bfd272950bebef09beeba
 
   useEffect(() => {
     // Initialiser la connexion Socket.IO
@@ -19,10 +33,43 @@ export const useSocket = () => {
     // Gestionnaires d'événements
     socketRef.current.on('connect', () => {
       console.log('Connecté au serveur Socket.IO');
+      // Tentative d'authentification automatique via token stocké
+      try {
+        
+        if (keys) {
+          if (keys.accessToken) {
+            socketRef.current?.emit('protect', keys.accessToken);
+          }
+        }
+      } catch (err) {
+        console.log('❌ Erreur lors de la tentative d\'auth auto:', err);
+      }
+    });
+
+    socketRef.current.on('authenticate_success', (data: any) => {
+      console.log('🔐 authenticate_success:', data);
+      setIsAuthenticated(true);
+    });
+
+    socketRef.current.on('authenticate_error', (data: any) => {
+      console.log('🔐 authenticate_error:', data);
+      setIsAuthenticated(false);
+    });
+
+    // Handlers pour la recherche d'utilisateurs (une seule fois au connect)
+    socketRef.current.on('user_found', (data: { users: UserSearch[] }) => {
+      setUserSearch(data);
+
+    });
+
+    socketRef.current.on('user_not_found', (data: any) => {
+      console.log('🔍 user_not_found:', data);
+      setUserSearch({ users: [] });
     });
 
     socketRef.current.on('disconnect', () => {
       console.log('Déconnecté du serveur Socket.IO');
+      setIsAuthenticated(false);
     });
 
     // Nettoyage à la déconnexion
@@ -41,20 +88,9 @@ export const useSocket = () => {
     console.log('🔌 Socket actuel:', socketRef.current ? 'CONNECTÉ' : 'NON CONNECTÉ');
     
     if (socketRef.current) {
-        console.log('🚀 Émission du message via socket...');
-        console.log('📡 Statut du socket:');
-        console.log('  - Connecté:', socketRef.current.connected);
-        console.log('  - ID:', socketRef.current.id);
-        // console.log('  - État:', socketRef.current.active ? 'ACTIF' : 'INACTIF');
-        
         try {
             socketRef.current.emit(event, data);
             console.log('✅ Message émis avec succès');
-            console.log('📊 Détails de l\'émission:');
-            console.log('  - Event:', event);
-            console.log('  - Data size:', JSON.stringify(data).length, 'bytes');
-            console.log('  - Timestamp:', new Date().toISOString());
-            
         } catch (error: any) {
             console.log('❌ Erreur lors de l\'émission du message:');
             console.log('  - Type:', error.name);
@@ -63,21 +99,18 @@ export const useSocket = () => {
         }
     } else {
         console.log('❌ Impossible d\'envoyer le message: socket non connecté');
-        console.log('🔍 Raisons possibles:');
-        console.log('  - Socket non initialisé');
-        console.log('  - Connexion perdue');
-        console.log('  - Composant démonté');
-        console.log('  - Token d\'authentification manquant');
-        
-        // Vérifier le token
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        console.log('🔑 Token disponible:', token ? 'OUI' : 'NON');
-        if (token) {
-            console.log('🔑 Token (premiers caractères):', token.substring(0, 20) + '...');
-        }
     }
-    
     console.log('🏁 Fin de sendMessage (frontend)');
+  };
+
+  // Fonction dédiée pour la recherche d'utilisateurs
+  const searchUser = (username: string) => {
+    if (!socketRef.current) {
+      console.log('❌ Socket non connecté');
+      return;
+    }
+    console.log('🔍 Recherche utilisateur:', username);
+    socketRef.current.emit('search_user', { username });
   };
 
   // Fonction pour écouter les événements
@@ -117,10 +150,17 @@ export const useSocket = () => {
   return {
     socket: socketRef.current,
     sendMessage,
+    searchUser,
     subscribeToEvent,
     unsubscribeFromEvent,
+<<<<<<< HEAD
     searchUser,
     userSearch
+=======
+    message,
+    userSearch,
+    isAuthenticated
+>>>>>>> 81d20a0efc876092e15bfd272950bebef09beeba
   };
 };
  

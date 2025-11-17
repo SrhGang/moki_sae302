@@ -51,7 +51,7 @@ const useAuth = () => {
       }
 
     } catch (e) {
-        
+      console.error(e)
     }
     return { login, logout, message };
   }
