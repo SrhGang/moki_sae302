@@ -73,6 +73,7 @@ body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--Cream);
   color: var(--Pure-Black);
+  overflow: hidden;
 }
 
 /* ====== DASHBOARD ====== */

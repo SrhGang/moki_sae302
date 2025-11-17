@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = 'http://localhost:3000';
+const SOCKET_SERVER_URL = 'http://10.16.48.189:3000';
 
 export const useSocket = () => {
   const socketRef = useRef<typeof Socket | null>(null);
-  const [message, setMessage] = useState([])
+   const [listUser, setListUser] = useState();
+  const [message, setMessage] = useState([]);
 
   useEffect(() => {
     // Initialiser la connexion Socket.IO
@@ -86,6 +87,26 @@ export const useSocket = () => {
     }
   };
 
+
+  interface UserSearch {
+    username: string;
+    socketid: string | null;
+    profilePicture: string;
+  }
+
+  const [ userSearch, setUserSearch ] = useState<{ users: UserSearch[] }>({ users: []});
+  const searchUser = (username: string) => {
+
+    sendMessage('search_user', { username })
+
+    subscribeToEvent("user_found", (data: { users: UserSearch[]})=> {
+      console.log(data);
+      
+      setUserSearch(data);
+    } )
+  }
+
+
   // Fonction pour arrêter d'écouter les événements
   const unsubscribeFromEvent = (event: string, callback: (data: any) => void) => {
     if (socketRef.current) {
@@ -98,8 +119,11 @@ export const useSocket = () => {
     sendMessage,
     subscribeToEvent,
     unsubscribeFromEvent,
+    searchUser,
+    userSearch
   };
 };
+ 
 
 // // ==========================Message========================
 // interface Message {

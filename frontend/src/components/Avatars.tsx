@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/NavBar.css"
 import { useAvatar } from "../hooks/useAvatar";
+
 
 const Avatars = ()=>{
     const [selected, setSelected] = useState<number>(0);
     const { updateAvatar } = useAvatar();
+    const navigate = useNavigate();
 
     return(
         <>
@@ -28,9 +30,12 @@ const Avatars = ()=>{
                 </div>
 
                 <section className="btn-valid-chose">
-                    <button onClick={()=> {
-                        updateAvatar(`./assets/img/peeps-avatar-alpha-${selected}.png`);
+                    <button onClick={async ()=> {
+                        const update = await updateAvatar(`./assets/img/peeps-avatar-alpha-${selected}.png`);
+                    
+
                     }} className="btn-valid" id="btnValidAvatar" type="button">Valider</button>
+                
                 </section>
             </div>
         </div>

@@ -22,7 +22,7 @@ interface Conversation {
 }
 
 const Dashboard: React.FC = () => {
-  const [searchUser, setSearchUser] = useState("");
+  
   const [allUsers, setAllUsers] = useState<Conversation[]>([]); // Tous les utilisateurs du backend
   const [isLoading, setIsLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([
@@ -58,8 +58,8 @@ const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversati
   const navigate = useNavigate();
   const { protect, logout } = useAuth();
   const [newMessage, setNewMessage] = useState("");
-
-  const { socket, sendMessage, subscribeToEvent, unsubscribeFromEvent } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
+  
+  const { socket, searchUser, sendMessage, subscribeToEvent, unsubscribeFromEvent, userSearch } = useSocket();   // +==================== J'AI AJOUTE ====================+ //
 
  const handleSend = () => {
     if (!newMessage.trim() || !selectedConv || !socket) return;
@@ -125,33 +125,33 @@ const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversati
   //   setSelectedUser(user);
   // };
   
-  useEffect(() => {
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:3001/api/users'); // Votre endpoint
-      const data = await response.json();
+//   useEffect(() => {
+//   const fetchUsers = async () => {
+//     try {
+//       setIsLoading(true);
+//       const response = await fetch('http://localhost:3001/api/users'); // Votre endpoint
+//       const data = await response.json();
       
-      // Transformer les données en format Conversation
-      const conversationsFromBackend: Conversation[] = data.map((user: any) => ({
-        id: user.id,
-        name: user.name,
-        status: user.status || 'Hors ligne',
-        profile: user.avatar || 'default-avatar.png',
-        messages: []
-      }));
+//       // Transformer les données en format Conversation
+//       const conversationsFromBackend: Conversation[] = data.map((user: any) => ({
+//         id: user.id,
+//         name: user.name,
+//         status: user.status || 'Hors ligne',
+//         profile: user.avatar || 'default-avatar.png',
+//         messages: []
+//       }));
       
-      setConversations(conversationsFromBackend);
-      setAllUsers(data);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des utilisateurs:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+//       setConversations(conversationsFromBackend);
+//       setAllUsers(data);
+//     } catch (error) {
+//       console.error('Erreur lors de la récupération des utilisateurs:', error);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 
-  fetchUsers();
-}, []);
+//   fetchUsers();
+// }, []);
 
   return (
     <div className="dashboard">
@@ -171,9 +171,13 @@ const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversati
         <div className="sidebar__search">
           <input className="input_search" type="text" placeholder="Recherche..." 
           
-          // value={searchQuery}
-         value={searchUser}
-         onChange={(e) => setSearchQuery(e.target.value)} />  
+          value={searchQuery}
+        //  value={searchUser}
+         onChange={(e) => {
+          searchUser(e.target.value)
+          setSearchQuery(e.target.value)
+          setIsLoading(false);
+          }} />  
           <i className="icon icon-search">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
           </i>
@@ -187,21 +191,20 @@ const [selectedConv, setSelectedConv] = useState<Conversation | null>(conversati
                 <div className="loading">Chargement...</div>
               ) : (
             <>
-           {/* /* {conversations.map((conv) => (
+           {userSearch.users.map((u) => (
                 <div
-                key={conv.id}
-                className={`conversation ${
-                    selectedConv?.id === conv.id ? "conversation--active" : ""
-                }`}
-                onClick={() => setSelectedConv(conv)}
+                key={u.socketid}
+                className={`conversation`}
+                // onClick={() => setSelectedConv(conv)}
                 >
-                <div className="conversation__avatar"><img src={`./assets/img/${conv.profile}`} /></div>
+                <div className="conversation__avatar"><img src={`${u.profilePicture}`} /></div>
                 <div className="conversation__info">
-                    <span className="conversation__name">{conv.name}</span>
-                    <span className="conversation__status">{conv.status}</span>
+                    <span className="conversation__name">{u.username}</span>
+                    {/* <span className="conversation__status">{conv.status}</span> */}
                 </div>
                 </div>
-            ))} */ }
+            ))} 
+            
              {conversations
               .filter(conv => 
                 conv.name.toLowerCase().includes(searchQuery.toLowerCase())

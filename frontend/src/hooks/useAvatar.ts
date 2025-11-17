@@ -5,30 +5,36 @@ import { useAuthContext } from "contexts/AuthContext";
 import { useApiCall } from "hooks/useApiCall";
 
 
-
 export const useAvatar = () => {
     const { apiCall } = useApiCall();
     const { user, setUser } = useAuthContext();
 
-
+const navigate = useNavigate();
     const updateAvatar = async (profilePicture: string) => {
         try {
             if (!profilePicture) {
                 return null;
             }
 
-            const update = await apiCall(`/api/avatar/`, {
+            const update: {message: string; code: string; } = await apiCall(`/api/avatar/`, {
                 method: 'PUT',
                 withAuth: true,
                 body: JSON.stringify({profilePicture})
             });
 
- 
+            if (update.code === "AVATAR_UPDATED"){console.log("Je vais rediriger");
+            
+                setUser({
+                    ...user!,
+                    profileImage: profilePicture
+                });
+            }
+
             // setUser({
             //     ...user,
             //     profileImage: update?.profileImage
             // });
-            return user;
+            return update;
         } catch (e) {
             
         }
